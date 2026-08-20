@@ -300,12 +300,36 @@ button.submit:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var
 .form-note { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--green); text-align: center; margin-top: 0.4rem; display: none; font-weight: 700; }
 .form-note.show { display: block; }
 
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.4rem; margin-top: 2rem; }
+.shop-card {
+  background: var(--paper-alt); border: 2.5px solid var(--ink); border-radius: 16px;
+  overflow: hidden; opacity: 0; transform: translateY(28px) scale(0.96);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2,0.85,0.25,1.1), box-shadow 0.25s;
+  box-shadow: 5px 5px 0 var(--c);
+}
+.shop-card.in-view { opacity: 1; transform: translateY(0) scale(1); }
+.shop-card:hover { box-shadow: 8px 8px 0 var(--c); transform: translateY(-3px) scale(1.01); }
+.shop-card .shop-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; border-bottom: 2.5px solid var(--ink); background: var(--paper); }
+.shop-card .shop-body { padding: 1.2rem 1.3rem 1.4rem; }
+.shop-card h3 { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.25rem; margin-bottom: 0.4rem; }
+.shop-card p { color: var(--ink-soft); font-size: 0.88rem; line-height: 1.5; margin-bottom: 0.7rem; }
+.shop-card .shop-price { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.85rem; color: var(--c); display: block; margin-bottom: 0.8rem; }
+.shop-card .shop-buy {
+  display: block; text-align: center; width: 100%;
+  background: var(--c); color: white; border: 2px solid var(--ink); border-radius: 999px;
+  padding: 0.7rem; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.8rem;
+  text-decoration: none; cursor: pointer; box-shadow: 3px 3px 0 var(--ink);
+  transition: transform 0.15s;
+}
+.shop-card .shop-buy:hover { transform: translate(-1px, -1px); }
+.shop-card .shop-buy.disabled { background: var(--ink-soft); cursor: not-allowed; box-shadow: none; }
+
 footer { text-align: center; padding: 3rem 1.5rem; border-top: 2px solid var(--ink); }
 footer p { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--ink-soft); }
 footer a { color: var(--ink-soft); }
-
 </style>
 <style>:root { --c: var(--green); }</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body data-service="boutique">
 
@@ -331,17 +355,11 @@ footer a { color: var(--ink-soft); }
   </div>
 </section>
 
-<section class="section">
-  <div class="eyebrow">Produits</div>
-  <h2>Ce qui est disponible</h2>
-  <div class="card-grid">
-    <div class="reveal-card">
-      <h3>Pack 10 prompts Suno personnalisés</h3>
-      <p>Dix prompts prêts à utiliser pour générer des chansons personnalisées avec l'IA Suno.</p>
-      <span class="price-tag">5 000 FCFA</span><br>
-      <a class="btn-external" href="#" target="_blank" rel="noopener">Accéder au produit →</a>
-    </div>
-  </div>
+
+<section class="section" id="dynamicSection" style="display:none;">
+  <div class="eyebrow">Nouveautés</div>
+  <h2>Récemment ajoutés</h2>
+  <div class="shop-grid" id="dynamicGrid"></div>
 </section>
 
 <section class="contact" id="contact">
@@ -482,6 +500,59 @@ if (contactForm) {
     if (preselect && serviceSelect) serviceSelect.value = preselect;
   });
 }
+
+// ---------- BOUTIQUE : produits dynamiques (Supabase) ----------
+(async function loadShopItems() {
+  const SUPABASE_URL = 'https://apknunsvetaeltzopdpp.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_MtxZI1erxvww-BU5IIz8og_CsvW7otl';
+  const sbShop = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const { data: items, error } = await sbShop.from('content_items').select('*').eq('page_slug', 'boutique').order('created_at', { ascending: true });
+  if (error || !items || items.length === 0) return;
+
+  const section = document.getElementById('dynamicSection');
+  const grid = document.getElementById('dynamicGrid');
+
+  function buildBuyButton(item) {
+    const type = item.button_type;
+    const value = item.button_value;
+    if (type === 'lien_externe' || type === 'paiement') {
+      if (!value) return `<span class="shop-buy disabled">Bientôt disponible</span>`;
+      return `<a class="shop-buy" href="${value}" target="_blank" rel="noopener">${type === 'paiement' ? 'Payer maintenant' : 'Acheter'}</a>`;
+    }
+    if (type === 'whatsapp') {
+      const msg = `Bonjour, je suis intéressé(e) par le produit "${item.title}" sur votre boutique By Jiee.`;
+      return `<a class="shop-buy" href="${buildWhatsAppLink(msg)}" target="_blank" rel="noopener">Commander via WhatsApp</a>`;
+    }
+    if (type === 'devis') {
+      return `<a class="shop-buy" href="#contact" onclick="document.getElementById('service').value='boutique';">Demander un devis</a>`;
+    }
+    return `<span class="shop-buy disabled">Indisponible</span>`;
+  }
+
+  grid.innerHTML = items.map(item => `
+    <div class="shop-card">
+      ${item.images && item.images.length ? `<img class="shop-img" src="${item.images[0]}" alt="${item.title}">` : ''}
+      <div class="shop-body">
+        <h3>${item.title}</h3>
+        <p>${item.description || ''}</p>
+        ${item.meta ? `<span class="shop-price">${item.meta}</span>` : ''}
+        ${buildBuyButton(item)}
+      </div>
+    </div>
+  `).join('');
+  section.style.display = 'block';
+
+  const shopObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('in-view'), i * 70);
+        shopObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  grid.querySelectorAll('.shop-card').forEach(el => shopObserver.observe(el));
+})();
 
 </script>
 </body>

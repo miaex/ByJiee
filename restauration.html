@@ -306,6 +306,7 @@ footer a { color: var(--ink-soft); }
 
 </style>
 <style>:root { --c: var(--coral); }</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body data-service="restauration">
 
@@ -364,6 +365,12 @@ footer a { color: var(--ink-soft); }
     <div class="step"><div class="step-num">02</div><div><h4>Diagnostic</h4><p>Je vous indique ce qui est possible de restaurer et le délai estimé.</p></div></div>
     <div class="step"><div class="step-num">03</div><div><h4>Restauration & livraison</h4><p>Vous recevez la version restaurée en haute résolution.</p></div></div>
   </div>
+</section>
+
+<section class="section" id="dynamicSection" style="display:none;">
+  <div class="eyebrow">Réalisations</div>
+  <h2>Ajouts récents</h2>
+  <div class="card-grid" id="dynamicGrid"></div>
 </section>
 
 <section class="contact" id="contact">
@@ -505,6 +512,40 @@ if (contactForm) {
   });
 }
 
+
+  // ---------- CONTENU DYNAMIQUE (Supabase) ----------
+  (async function loadDynamicContent() {
+    const SUPABASE_URL = 'https://apknunsvetaeltzopdpp.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_MtxZI1erxvww-BU5IIz8og_CsvW7otl';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const pageSlug = document.body.getAttribute('data-service');
+    if (!pageSlug) return;
+
+    const { data: items, error } = await sb.from('content_items').select('*').eq('page_slug', pageSlug).order('created_at', { ascending: true });
+    if (error || !items || items.length === 0) return;
+
+    const section = document.getElementById('dynamicSection');
+    const grid = document.getElementById('dynamicGrid');
+    grid.innerHTML = items.map(item => `
+      <div class="reveal-card">
+        ${item.images && item.images.length ? `<img src="${item.images[0]}" alt="${item.title}">` : ''}
+        <h3>${item.title}</h3>
+        <p>${item.description || ''}</p>
+        ${item.meta ? `<span class="price-tag">${item.meta}</span>` : ''}
+      </div>
+    `).join('');
+    section.style.display = 'block';
+
+    const newObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('in-view'), i * 70);
+          newObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    grid.querySelectorAll('.reveal-card').forEach(el => newObserver.observe(el));
+  })();
 </script>
 </body>
 </html>

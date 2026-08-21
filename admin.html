@@ -190,7 +190,14 @@
     <form id="itemForm">
       <div class="field"><label for="fTitle">Titre</label><input type="text" id="fTitle" required></div>
       <div class="field"><label for="fDesc">Description courte</label><textarea id="fDesc" required></textarea></div>
-      <div class="field"><label for="fMeta">Info (prix, date, statut...)</label><input type="text" id="fMeta" placeholder="Ex: 15 000 FCFA"></div>
+      <div class="field"><label for="fMeta">Info complémentaire (délai, garantie, statut...)</label><input type="text" id="fMeta" placeholder="Ex: Livraison sous 24h"></div>
+
+      <div id="priceFieldWrap" style="display:none;">
+        <div class="field">
+          <label for="fPrice">Prix (en FCFA)</label>
+          <input type="number" id="fPrice" placeholder="Ex: 15000" min="0" step="1">
+        </div>
+      </div>
 
       <div id="buttonConfigFields" style="display:none;">
         <div class="field">
@@ -383,6 +390,7 @@
         <div class="item-info">
           <div class="title">${item.title}</div>
           <div class="desc">${item.description || ''}</div>
+          ${item.price ? `<div class="meta" style="--c: var(${colorVar})">${Number(item.price).toLocaleString('fr-FR')} FCFA</div>` : ''}
           ${item.meta ? `<div class="meta" style="--c: var(${colorVar})">${item.meta}</div>` : ''}
           ${item.button_type ? `<span class="btn-tag">${buttonTypeLabel(item.button_type)}</span>` : ''}
         </div>
@@ -515,6 +523,8 @@
   const fTitle = document.getElementById('fTitle');
   const fDesc = document.getElementById('fDesc');
   const fMeta = document.getElementById('fMeta');
+  const fPrice = document.getElementById('fPrice');
+  const priceFieldWrap = document.getElementById('priceFieldWrap');
   const fImages = document.getElementById('fImages');
   const imagePreviewStrip = document.getElementById('imagePreviewStrip');
   const uploadStatus = document.getElementById('uploadStatus');
@@ -602,12 +612,14 @@
     modalImages = item && item.images ? [...item.images] : [];
     const isBoutique = currentSection === 'boutique';
     buttonConfigFields.style.display = isBoutique ? 'block' : 'none';
+    priceFieldWrap.style.display = isBoutique ? 'block' : 'none';
 
     if (item) {
       modalTitle.textContent = "Modifier l'élément";
       fTitle.value = item.title || '';
       fDesc.value = item.description || '';
       fMeta.value = item.meta || '';
+      fPrice.value = item.price || '';
       fButtonType.value = item.button_type || '';
       fButtonValue.value = item.button_value || '';
       fButtonType.dispatchEvent(new Event('change'));
@@ -637,6 +649,8 @@
       title: fTitle.value,
       description: fDesc.value,
       meta: fMeta.value,
+      price: currentSection === 'boutique' && fPrice.value ? parseFloat(fPrice.value) : null,
+      currency: 'XOF',
       images: modalImages,
       button_type: currentSection === 'boutique' ? (fButtonType.value || null) : null,
       button_value: currentSection === 'boutique' ? (fButtonValue.value || null) : null,

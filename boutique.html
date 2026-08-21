@@ -303,26 +303,43 @@ button.submit:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var
 .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.4rem; margin-top: 2rem; }
 .shop-card {
   background: var(--paper-alt); border: 2.5px solid var(--ink); border-radius: 16px;
-  overflow: hidden; opacity: 0; transform: translateY(28px) scale(0.96);
+  overflow: hidden; opacity: 0; transform: translateY(28px) scale(0.96); position: relative;
   transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2,0.85,0.25,1.1), box-shadow 0.25s;
   box-shadow: 5px 5px 0 var(--c);
 }
 .shop-card.in-view { opacity: 1; transform: translateY(0) scale(1); }
-.shop-card:hover { box-shadow: 8px 8px 0 var(--c); transform: translateY(-3px) scale(1.01); }
-.shop-card .shop-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; border-bottom: 2.5px solid var(--ink); background: var(--paper); }
+.shop-card:hover { box-shadow: 9px 9px 0 var(--c); transform: translateY(-4px) scale(1.015); }
+.shop-card .shop-img-wrap { position: relative; overflow: hidden; border-bottom: 2.5px solid var(--ink); background: var(--paper); }
+.shop-card .shop-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; transition: transform 0.4s ease; }
+.shop-card:hover .shop-img { transform: scale(1.08); }
+.shop-card .shop-badge {
+  position: absolute; top: 0.7rem; left: 0.7rem;
+  background: var(--yellow); color: var(--ink); border: 2px solid var(--ink);
+  font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem; border-radius: 999px;
+}
 .shop-card .shop-body { padding: 1.2rem 1.3rem 1.4rem; }
-.shop-card h3 { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.25rem; margin-bottom: 0.4rem; }
-.shop-card p { color: var(--ink-soft); font-size: 0.88rem; line-height: 1.5; margin-bottom: 0.7rem; }
-.shop-card .shop-price { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.85rem; color: var(--c); display: block; margin-bottom: 0.8rem; }
+.shop-card h3 { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.3rem; margin-bottom: 0.4rem; line-height: 1.05; }
+.shop-card p { color: var(--ink-soft); font-size: 0.88rem; line-height: 1.5; margin-bottom: 0.9rem; }
+.shop-card .shop-price-block {
+  background: var(--paper); border: 2px solid var(--ink); border-radius: 10px;
+  padding: 0.6rem 0.8rem; margin-bottom: 0.9rem;
+}
+.shop-card .shop-price-fcfa { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 1.35rem; color: var(--ink); display: block; }
+.shop-card .shop-price-converted { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--ink-soft); }
 .shop-card .shop-buy {
   display: block; text-align: center; width: 100%;
   background: var(--c); color: white; border: 2px solid var(--ink); border-radius: 999px;
-  padding: 0.7rem; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.8rem;
+  padding: 0.8rem; font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.85rem;
   text-decoration: none; cursor: pointer; box-shadow: 3px 3px 0 var(--ink);
   transition: transform 0.15s;
 }
-.shop-card .shop-buy:hover { transform: translate(-1px, -1px); }
+.shop-card .shop-buy:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); }
 .shop-card .shop-buy.disabled { background: var(--ink-soft); cursor: not-allowed; box-shadow: none; }
+.shop-card .shop-trust {
+  display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+  margin-top: 0.6rem; font-family: 'Space Mono', monospace; font-size: 0.66rem; color: var(--ink-soft);
+}
 
 footer { text-align: center; padding: 3rem 1.5rem; border-top: 2px solid var(--ink); }
 footer p { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--ink-soft); }
@@ -432,16 +449,22 @@ function buildWhatsAppLink(text) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 }
 
-// TODO (étape base de données) : une fois Supabase/Formspree branché,
-// appeler ici l'enregistrement réel de la demande avant/pendant l'ouverture de WhatsApp.
+// Enregistrement réel de la demande dans Supabase (visible dans l'admin > Messages)
+const SUPABASE_URL_MSG = 'https://apknunsvetaeltzopdpp.supabase.co';
+const SUPABASE_KEY_MSG = 'sb_publishable_MtxZI1erxvww-BU5IIz8og_CsvW7otl';
+const sbMsg = window.supabase.createClient(SUPABASE_URL_MSG, SUPABASE_KEY_MSG);
+
 async function recordSubmission(data) {
-  // Exemple futur avec Formspree :
-  // await fetch('https://formspree.io/f/VOTRE_ID', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(data)
-  // });
-  console.log('Demande à enregistrer (en attente de connexion base de données) :', data);
+  try {
+    await sbMsg.from('messages').insert({
+      name: data.name || null,
+      contact: data.contactMethod || null,
+      service: data.service || null,
+      message: data.message || null,
+    });
+  } catch (err) {
+    console.warn('Enregistrement du message impossible :', err);
+  }
 }
 
 // Top nav "Contact" button -> WhatsApp direct, avec message générique selon la page
@@ -503,15 +526,46 @@ if (contactForm) {
 
 // ---------- BOUTIQUE : produits dynamiques (Supabase) ----------
 (async function loadShopItems() {
-  const SUPABASE_URL = 'https://apknunsvetaeltzopdpp.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_MtxZI1erxvww-BU5IIz8og_CsvW7otl';
-  const sbShop = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  const { data: items, error } = await sbShop.from('content_items').select('*').eq('page_slug', 'boutique').order('created_at', { ascending: true });
+  const { data: items, error } = await sbMsg.from('content_items').select('*').eq('page_slug', 'boutique').order('created_at', { ascending: true });
   if (error || !items || items.length === 0) return;
 
   const section = document.getElementById('dynamicSection');
   const grid = document.getElementById('dynamicGrid');
+
+  // Détection de la devise du visiteur + taux de change (informatif uniquement — le paiement reste en FCFA)
+  let visitorCurrency = null;
+  let conversionRate = null;
+  try {
+    const geoRes = await fetch('https://ipapi.co/json/');
+    const geo = await geoRes.json();
+    if (geo && geo.currency && geo.currency !== 'XOF') {
+      visitorCurrency = geo.currency;
+      const rateRes = await fetch('https://open.er-api.com/v6/latest/XOF');
+      const rateData = await rateRes.json();
+      if (rateData && rateData.rates && rateData.rates[visitorCurrency]) {
+        conversionRate = rateData.rates[visitorCurrency];
+      }
+    }
+  } catch (e) {
+    // Géolocalisation/conversion indisponible — on affiche seulement le prix en FCFA, sans bloquer la page
+    visitorCurrency = null;
+  }
+
+  function formatPrice(item) {
+    if (!item.price) return '';
+    const fcfa = Number(item.price).toLocaleString('fr-FR') + ' FCFA';
+    let converted = '';
+    if (visitorCurrency && conversionRate) {
+      const amount = item.price * conversionRate;
+      try {
+        converted = new Intl.NumberFormat(undefined, { style: 'currency', currency: visitorCurrency, maximumFractionDigits: 2 }).format(amount);
+      } catch (e) { converted = ''; }
+    }
+    return `<div class="shop-price-block">
+      <span class="shop-price-fcfa">${fcfa}</span>
+      ${converted ? `<span class="shop-price-converted">≈ ${converted} — indicatif, paiement en FCFA</span>` : ''}
+    </div>`;
+  }
 
   function buildBuyButton(item) {
     const type = item.button_type;
@@ -530,17 +584,26 @@ if (contactForm) {
     return `<span class="shop-buy disabled">Indisponible</span>`;
   }
 
-  grid.innerHTML = items.map(item => `
+  const now = Date.now();
+  grid.innerHTML = items.map(item => {
+    const isNew = (now - new Date(item.created_at).getTime()) < 1000 * 60 * 60 * 24 * 14; // 14 jours
+    return `
     <div class="shop-card">
-      ${item.images && item.images.length ? `<img class="shop-img" src="${item.images[0]}" alt="${item.title}">` : ''}
+      <div class="shop-img-wrap">
+        ${isNew ? `<span class="shop-badge">Nouveau</span>` : ''}
+        ${item.images && item.images.length ? `<img class="shop-img" src="${item.images[0]}" alt="${item.title}">` : ''}
+      </div>
       <div class="shop-body">
         <h3>${item.title}</h3>
         <p>${item.description || ''}</p>
-        ${item.meta ? `<span class="shop-price">${item.meta}</span>` : ''}
+        ${formatPrice(item)}
+        ${item.meta ? `<p style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--ink-soft); margin-top:-0.5rem; margin-bottom:0.8rem;">${item.meta}</p>` : ''}
         ${buildBuyButton(item)}
+        <div class="shop-trust">🔒 Échange direct et sécurisé avec Jiee</div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
   section.style.display = 'block';
 
   const shopObserver = new IntersectionObserver((entries) => {

@@ -421,16 +421,22 @@ function buildWhatsAppLink(text) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 }
 
-// TODO (étape base de données) : une fois Supabase/Formspree branché,
-// appeler ici l'enregistrement réel de la demande avant/pendant l'ouverture de WhatsApp.
+// Enregistrement réel de la demande dans Supabase (visible dans l'admin > Messages)
+const SUPABASE_URL_MSG = 'https://apknunsvetaeltzopdpp.supabase.co';
+const SUPABASE_KEY_MSG = 'sb_publishable_MtxZI1erxvww-BU5IIz8og_CsvW7otl';
+const sbMsg = window.supabase.createClient(SUPABASE_URL_MSG, SUPABASE_KEY_MSG);
+
 async function recordSubmission(data) {
-  // Exemple futur avec Formspree :
-  // await fetch('https://formspree.io/f/VOTRE_ID', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(data)
-  // });
-  console.log('Demande à enregistrer (en attente de connexion base de données) :', data);
+  try {
+    await sbMsg.from('messages').insert({
+      name: data.name || null,
+      contact: data.contactMethod || null,
+      service: data.service || null,
+      message: data.message || null,
+    });
+  } catch (err) {
+    console.warn('Enregistrement du message impossible :', err);
+  }
 }
 
 // Top nav "Contact" button -> WhatsApp direct, avec message générique selon la page
@@ -493,13 +499,10 @@ if (contactForm) {
 
   // ---------- CONTENU DYNAMIQUE (Supabase) ----------
   (async function loadDynamicContent() {
-    const SUPABASE_URL = 'https://apknunsvetaeltzopdpp.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_MtxZI1erxvww-BU5IIz8og_CsvW7otl';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const pageSlug = document.body.getAttribute('data-service');
     if (!pageSlug) return;
 
-    const { data: items, error } = await sb.from('content_items').select('*').eq('page_slug', pageSlug).order('created_at', { ascending: true });
+    const { data: items, error } = await sbMsg.from('content_items').select('*').eq('page_slug', pageSlug).order('created_at', { ascending: true });
     if (error || !items || items.length === 0) return;
 
     const section = document.getElementById('dynamicSection');

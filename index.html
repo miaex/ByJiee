@@ -208,6 +208,50 @@
   }
   @keyframes bounceDot { 0%,100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
 
+  /* ---------- À LA UNE ---------- */
+  .featured-banner {
+    max-width: 1000px; margin: 0 auto; padding: 0 1.5rem;
+    margin-top: -1px;
+  }
+  .featured-inner {
+    position: relative; overflow: hidden;
+    background: linear-gradient(115deg, var(--magenta), var(--purple) 55%, var(--blue));
+    border: 3px solid var(--ink);
+    border-radius: 22px;
+    padding: 1.8rem 1.8rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+    flex-wrap: wrap;
+    box-shadow: 6px 6px 0 var(--ink);
+    animation: bannerPulse 3s ease-in-out infinite;
+  }
+  @keyframes bannerPulse {
+    0%, 100% { box-shadow: 6px 6px 0 var(--ink); }
+    50% { box-shadow: 6px 6px 0 var(--ink), 0 0 26px rgba(230,59,143,0.5); }
+  }
+  .featured-tag {
+    position: absolute; top: -1px; left: 1.6rem;
+    background: var(--yellow); color: var(--ink);
+    font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.68rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.3rem 0.8rem; border-radius: 0 0 8px 8px;
+    border: 2px solid var(--ink); border-top: none;
+  }
+  .featured-text { color: white; flex: 1; min-width: 220px; padding-top: 0.6rem; }
+  .featured-text h3 {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 900;
+    font-size: clamp(1.4rem, 3.4vw, 2rem); line-height: 1.05; margin-bottom: 0.4rem;
+  }
+  .featured-text p { font-size: 0.95rem; opacity: 0.95; max-width: 46ch; }
+  .featured-cta {
+    background: white; color: var(--ink); text-decoration: none;
+    font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.85rem;
+    padding: 0.85rem 1.5rem; border-radius: 999px; border: 2px solid var(--ink);
+    white-space: nowrap; flex-shrink: 0;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+    transition: transform 0.15s;
+  }
+  .featured-cta:hover { transform: translate(-2px, -2px); }
+
   .intro {
     max-width: 720px; margin: 0 auto; padding: 6rem 1.5rem 3rem; text-align: center;
   }
@@ -300,6 +344,7 @@
   footer { text-align: center; padding: 3rem 1.5rem; border-top: 2px solid var(--ink); }
   footer p { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--ink-soft); }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -341,6 +386,17 @@
   </div>
   <div class="scroll-cue"><span>SCROLL</span><span class="dot"></span></div>
 </section>
+
+<div class="featured-banner" id="featuredBanner" style="display:none;">
+  <div class="featured-inner">
+    <span class="featured-tag">À la une</span>
+    <div class="featured-text">
+      <h3 id="featuredTitleText"></h3>
+      <p id="featuredDescText"></p>
+    </div>
+    <a class="featured-cta" id="featuredCtaLink" href="#">→</a>
+  </div>
+</div>
 
 <section class="intro">
   <div class="eyebrow">Le passeport</div>
@@ -519,9 +575,22 @@
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
   }
 
-  // TODO (étape base de données) : brancher ici Supabase/Formspree pour un vrai enregistrement.
+  // Enregistrement réel de la demande dans Supabase (visible dans l'admin > Messages)
+  const SUPABASE_URL_MSG = 'https://apknunsvetaeltzopdpp.supabase.co';
+  const SUPABASE_KEY_MSG = 'sb_publishable_MtxZI1erxvww-BU5IIz8og_CsvW7otl';
+  const sbMsg = window.supabase.createClient(SUPABASE_URL_MSG, SUPABASE_KEY_MSG);
+
   async function recordSubmission(data) {
-    console.log('Demande à enregistrer (en attente de connexion base de données) :', data);
+    try {
+      await sbMsg.from('messages').insert({
+        name: data.name || null,
+        contact: data.contactMethod || null,
+        service: data.service || null,
+        message: data.message || null,
+      });
+    } catch (err) {
+      console.warn('Enregistrement du message impossible :', err);
+    }
   }
 
   const navContactLink = document.getElementById('navContactLink');
@@ -554,7 +623,18 @@
 
     window.open(buildWhatsAppLink(text), '_blank');
     form.reset();
-  });
+  });  // ---------- À LA UNE (Supabase) ----------
+  (async function loadFeaturedBanner() {
+    const { data: f, error } = await sbMsg.from('featured').select('*').eq('id', 1).single();
+    if (error || !f || !f.active) return;
+
+    document.getElementById('featuredTitleText').textContent = f.title || '';
+    document.getElementById('featuredDescText').textContent = f.description || '';
+    const cta = document.getElementById('featuredCtaLink');
+    cta.textContent = f.button_label || 'En savoir plus';
+    cta.href = f.button_link || '#';
+    document.getElementById('featuredBanner').style.display = 'block';
+  })();
 </script>
 
 </body>

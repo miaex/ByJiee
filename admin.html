@@ -161,7 +161,7 @@
   <div class="logo">BY <span>JIEE</span></div>
   <div class="sub">PANNEAU D'ADMIN — ACCÈS RESTREINT</div>
   <form id="loginForm">
-    <input type="text" id="loginUser" placeholder="Identifiant" autocomplete="off" required>
+    <input type="email" id="loginUser" placeholder="Email" autocomplete="off" required>
     <input type="password" id="loginPass" placeholder="Mot de passe" required>
     <p class="error-msg" id="loginError">Identifiant ou mot de passe incorrect.</p>
     <button type="submit" class="btn-login">Se connecter</button>
@@ -693,17 +693,14 @@
     await renderContentList(currentSection, sections.find(s => s.id === currentSection).color);
   });
 
-  // ---------- AUTH GATE ----------
-  const ADMIN_USER = 'jieejiee';
-  const ADMIN_PASS = 'b2y0j0i3e1e1';
-  const AUTH_KEY = 'byjiee_admin_auth';
-
+  // ---------- AUTH GATE (Supabase Auth) ----------
   const authGate = document.getElementById('authGate');
   const appContent = document.getElementById('appContent');
   const loginForm = document.getElementById('loginForm');
   const loginUser = document.getElementById('loginUser');
   const loginPass = document.getElementById('loginPass');
   const loginError = document.getElementById('loginError');
+  const loginBtn = document.querySelector('#authGate .btn-login');
 
   function unlockApp() {
     authGate.style.display = 'none';
@@ -715,23 +712,38 @@
     appContent.classList.remove('unlocked');
   }
 
-  if (localStorage.getItem(AUTH_KEY) === 'true') unlockApp();
+  // Session déjà active sur cet appareil/navigateur ?
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) unlockApp();
+  })();
 
-  loginForm.addEventListener('submit', (e) => {
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (loginUser.value === ADMIN_USER && loginPass.value === ADMIN_PASS) {
-      localStorage.setItem(AUTH_KEY, 'true');
-      loginError.classList.remove('show');
-      unlockApp();
-    } else {
+    loginError.classList.remove('show');
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Connexion...';
+
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: loginUser.value,
+      password: loginPass.value,
+    });
+
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Se connecter';
+
+    if (error) {
+      loginError.textContent = 'Email ou mot de passe incorrect.';
       loginError.classList.add('show');
       loginPass.value = '';
+    } else {
+      unlockApp();
     }
   });
 
-  document.getElementById('logoutLink').addEventListener('click', (e) => {
+  document.getElementById('logoutLink').addEventListener('click', async (e) => {
     e.preventDefault();
-    localStorage.removeItem(AUTH_KEY);
+    await sb.auth.signOut();
     loginForm.reset();
     lockApp();
   });

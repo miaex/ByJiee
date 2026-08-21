@@ -99,8 +99,8 @@
   #featuredCarousel {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 9;
-    max-height: 88vh;
+    aspect-ratio: 3 / 4;
+    max-height: 78vh;
     overflow: hidden;
     display: none;
     border-bottom: 2px solid var(--ink);
@@ -108,7 +108,6 @@
   .fc-track {
     display: flex;
     height: 100%;
-    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
   }
   .fc-slide {
     position: relative;
@@ -121,12 +120,12 @@
   .fc-slide::before {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(11,10,9,0.96) 0%, rgba(11,10,9,0.85) 25%, rgba(11,10,9,0.15) 50%, transparent 65%);
+    background: linear-gradient(to top, rgba(11,10,9,0.92) 0%, rgba(11,10,9,0.75) 22%, rgba(11,10,9,0.1) 45%, transparent 60%);
   }
   .fc-content {
     position: absolute;
     left: 0; right: 0; bottom: 0;
-    padding: 2.2rem 1.8rem 2.4rem;
+    padding: 1.8rem 1.6rem 1.9rem;
     color: var(--paper);
     max-width: 760px;
     margin: 0 auto;
@@ -137,20 +136,14 @@
     letter-spacing: 0.1em; text-transform: uppercase;
     background: var(--magenta); color: white;
     padding: 0.3rem 0.75rem; border-radius: 999px;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.7rem;
   }
   .fc-title {
     font-family: 'Big Shoulders Display', sans-serif; font-weight: 900;
-    font-size: clamp(1.7rem, 4.5vw, 2.8rem); line-height: 1.02; margin-bottom: 0.5rem;
+    font-size: clamp(1.5rem, 5vw, 2.4rem); line-height: 1.02; margin-bottom: 0.4rem;
   }
-  .fc-tagline { font-size: 1rem; opacity: 0.95; max-width: 60ch; margin-bottom: 0.7rem; }
-  .fc-full {
-    font-size: 0.92rem; line-height: 1.6; opacity: 0.92; max-width: 65ch;
-    max-height: 0; overflow: hidden; transition: max-height 0.4s ease, margin 0.4s ease;
-    margin-bottom: 0;
-  }
-  .fc-slide.expanded .fc-full { max-height: 400px; margin-bottom: 0.9rem; }
-  .fc-actions { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; margin-top: 0.4rem; }
+  .fc-tagline { font-size: 0.95rem; opacity: 0.95; max-width: 60ch; margin-bottom: 0.6rem; }
+  .fc-actions { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; margin-top: 0.3rem; }
   .fc-toggle {
     background: none; border: none; color: var(--paper);
     font-family: 'Space Mono', monospace; font-size: 0.78rem; font-weight: 700;
@@ -158,7 +151,7 @@
     padding: 0; opacity: 0.9;
   }
   .fc-toggle .chev { transition: transform 0.3s ease; display: inline-block; }
-  .fc-slide.expanded .fc-toggle .chev { transform: rotate(180deg); }
+  .fc-toggle.open .chev { transform: rotate(180deg); }
   .fc-link {
     background: var(--paper); color: var(--ink); text-decoration: none;
     font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.78rem;
@@ -191,12 +184,34 @@
   .fc-arrow.next { right: 1rem; }
   @media (max-width: 620px) { .fc-arrow { display: none; } }
 
+  /* Panneau de texte complet, EN DESSOUS du carrousel — jamais sur l'image */
+  #fcExpandPanel {
+    max-height: 0;
+    overflow: hidden;
+    background: var(--paper-alt);
+    transition: max-height 0.45s ease;
+  }
+  #fcExpandPanel.open { max-height: 600px; }
+  .fc-expand-inner {
+    max-width: 720px; margin: 0 auto;
+    padding: 1.6rem 1.5rem;
+    border-bottom: 2px solid var(--ink);
+  }
+  .fc-expand-inner p {
+    font-size: 0.95rem; line-height: 1.7; color: var(--ink); margin-bottom: 1rem;
+  }
+  .fc-collapse-btn {
+    background: none; border: none; color: var(--magenta);
+    font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.78rem;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0;
+  }
+
   .hero {
     position: relative;
-    min-height: 92vh;
+    min-height: 78vh;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center;
-    padding: 4rem 1.5rem 3rem;
+    padding: 2.5rem 1.5rem 2.2rem;
     overflow: hidden;
   }
 
@@ -418,6 +433,12 @@
   <button class="fc-arrow prev" id="fcPrev" aria-label="Précédent">‹</button>
   <button class="fc-arrow next" id="fcNext" aria-label="Suivant">›</button>
   <div class="fc-nav" id="fcNav"></div>
+</div>
+<div id="fcExpandPanel">
+  <div class="fc-expand-inner">
+    <p id="fcExpandText"></p>
+    <button type="button" class="fc-collapse-btn" id="fcCollapseBtn">Réduire <span class="chev">▴</span></button>
+  </div>
 </div>
 
 <section class="hero" id="heroSection">
@@ -683,6 +704,9 @@
     const nav = document.getElementById('fcNav');
     const prevBtn = document.getElementById('fcPrev');
     const nextBtn = document.getElementById('fcNext');
+    const expandPanel = document.getElementById('fcExpandPanel');
+    const expandText = document.getElementById('fcExpandText');
+    const collapseBtn = document.getElementById('fcCollapseBtn');
     const total = items.length;
 
     function slideHTML(item, i) {
@@ -692,7 +716,6 @@
           <span class="fc-tag">À la une</span>
           <h2 class="fc-title">${item.title || ''}</h2>
           <p class="fc-tagline">${item.description || ''}</p>
-          ${item.full_text ? `<div class="fc-full">${item.full_text}</div>` : ''}
           <div class="fc-actions">
             ${item.full_text ? `<button type="button" class="fc-toggle" data-toggle="${i}">Lire plus <span class="chev">▾</span></button>` : ''}
             ${item.button_value ? `<a class="fc-link" href="${item.button_value}" target="${item.button_value.startsWith('http') ? '_blank' : '_self'}" rel="noopener">Découvrir →</a>` : ''}
@@ -708,10 +731,10 @@
 
     nav.innerHTML = items.map((_, i) => `<button type="button" class="fc-dot ${i === 0 ? 'active' : ''}" data-dot="${i}" aria-label="Aller à l'élément ${i + 1}"></button>`).join('');
 
-    const allSlides = track.querySelectorAll('.fc-slide');
     let current = 0; // 0..total-1 = vrais éléments, total = clone du premier
     let autoTimer = null;
     let paused = false;
+    let expandedIndex = null;
 
     function setPosition(index, animate = true) {
       track.style.transition = animate ? 'transform 0.85s cubic-bezier(0.65, 0, 0.35, 1)' : 'none';
@@ -722,9 +745,10 @@
       nav.querySelectorAll('.fc-dot').forEach((d, i) => d.classList.toggle('active', i === realIndex));
     }
 
-    function collapseAll() {
-      allSlides.forEach(s => s.classList.remove('expanded'));
-      track.querySelectorAll('.fc-toggle').forEach(btn => btn.innerHTML = 'Lire plus <span class="chev">▾</span>');
+    function collapsePanel() {
+      expandPanel.classList.remove('open');
+      track.querySelectorAll('.fc-toggle').forEach(btn => { btn.classList.remove('open'); btn.innerHTML = 'Lire plus <span class="chev">▾</span>'; });
+      expandedIndex = null;
     }
 
     function advance() {
@@ -765,7 +789,7 @@
 
     // Navigation manuelle : va directement au bon élément (peut revenir en arrière, c'est volontaire)
     function manualGoTo(realIndex) {
-      collapseAll();
+      collapsePanel();
       current = ((realIndex % total) + total) % total;
       setPosition(current, true);
       updateDots(current);
@@ -778,20 +802,29 @@
       dot.addEventListener('click', () => manualGoTo(parseInt(dot.dataset.dot)));
     });
 
-    // Lire plus / Réduire : coupe le défilement automatique tant que c'est ouvert
+    // Lire plus : ouvre un panneau EN DESSOUS du carrousel (jamais sur l'image), coupe le défilement auto
     track.querySelectorAll('[data-toggle]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const slide = btn.closest('.fc-slide');
-        const isExpanding = !slide.classList.contains('expanded');
-        collapseAll();
-        if (isExpanding) {
-          slide.classList.add('expanded');
-          btn.innerHTML = 'Réduire <span class="chev">▾</span>';
-          pauseTemporarily();
-        } else {
+        const i = parseInt(btn.dataset.toggle);
+        const isOpeningSame = expandedIndex === i;
+        if (isOpeningSame) {
+          collapsePanel();
           resumeAuto();
+        } else {
+          expandText.textContent = items[i].full_text || '';
+          expandPanel.classList.add('open');
+          track.querySelectorAll('.fc-toggle').forEach(b => { b.classList.remove('open'); b.innerHTML = 'Lire plus <span class="chev">▾</span>'; });
+          btn.classList.add('open');
+          btn.innerHTML = 'Réduire <span class="chev">▾</span>';
+          expandedIndex = i;
+          pauseTemporarily();
         }
       });
+    });
+
+    collapseBtn.addEventListener('click', () => {
+      collapsePanel();
+      resumeAuto();
     });
 
     // Le doigt (ou la souris) posé sur le carrousel met le défilement en pause,

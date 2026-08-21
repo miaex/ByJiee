@@ -122,7 +122,14 @@
   .cropper-box { background: var(--ink); border-radius: 16px; padding: 1.2rem; max-width: 500px; width: 100%; }
   .cropper-image-wrap { max-height: 60vh; overflow: hidden; background: #000; border-radius: 8px; }
   .cropper-image-wrap img { display: block; max-width: 100%; }
-  .cropper-hint { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: #8A8377; text-align: center; margin: 0.8rem 0; }
+  .cropper-hint { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: #8A8377; text-align: center; margin: 0.8rem 0 0.6rem; }
+  .cropper-ratios { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 0.9rem; }
+  .cropper-ratio-btn {
+    background: #1F3348; color: #D8D2C6; border: 2px solid #3A4E63; border-radius: 999px;
+    padding: 0.4rem 0.9rem; font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+    cursor: pointer;
+  }
+  .cropper-ratio-btn.active { background: var(--magenta); border-color: var(--magenta); color: white; }
   .cropper-actions { display: flex; gap: 0.7rem; }
 
   .message-card { background: var(--paper-alt); border: 2px solid var(--ink); border-radius: 14px; padding: 1.1rem 1.3rem; margin-bottom: 0.8rem; }
@@ -247,7 +254,8 @@
 <div class="cropper-overlay" id="cropperOverlay">
   <div class="cropper-box">
     <div class="cropper-image-wrap"><img id="cropperImage"></div>
-    <p class="cropper-hint">Ajuste le cadre pour choisir la partie à garder</p>
+    <p class="cropper-hint">Ajuste le cadre — choisis un format ou reste en libre</p>
+    <div class="cropper-ratios" id="cropperRatios"></div>
     <div class="cropper-actions">
       <button type="button" class="btn-secondary" id="cropperCancel">Annuler</button>
       <button type="button" class="btn-primary" id="cropperConfirm">Valider le recadrage</button>
@@ -517,15 +525,51 @@
 
   const cropperOverlay = document.getElementById('cropperOverlay');
   const cropperImage = document.getElementById('cropperImage');
+  const cropperRatios = document.getElementById('cropperRatios');
   let cropperInstance = null;
+  let currentRatioValue = NaN; // NaN = libre
+
+  const RATIO_PRESETS = [
+    { label: 'Libre', value: NaN },
+    { label: 'Portrait 3:4', value: 3 / 4 },
+    { label: 'Paysage 4:3', value: 4 / 3 },
+    { label: 'Carré 1:1', value: 1 },
+    { label: 'Large 16:9', value: 16 / 9 },
+  ];
+
+  // Le format suggéré en premier dépend de la page, mais "Libre" reste toujours disponible.
+  function suggestedRatioFor(section) {
+    if (section === 'boutique') return 1;
+    if (section === 'featured') return 3 / 4;
+    return 4 / 3;
+  }
+
+  function renderRatioButtons(suggested) {
+    cropperRatios.innerHTML = RATIO_PRESETS.map(r => {
+      const isSuggested = !isNaN(r.value) && Math.abs(r.value - suggested) < 0.001;
+      const label = isSuggested ? `${r.label} ★` : r.label;
+      return `<button type="button" class="cropper-ratio-btn ${isNaN(r.value) ? 'active' : ''}" data-ratio="${r.value}">${label}</button>`;
+    }).join('');
+    cropperRatios.querySelectorAll('[data-ratio]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = parseFloat(btn.dataset.ratio);
+        currentRatioValue = isNaN(val) ? NaN : val;
+        cropperRatios.querySelectorAll('.cropper-ratio-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (cropperInstance) cropperInstance.setAspectRatio(currentRatioValue);
+      });
+    });
+  }
 
   function openCropper(dataUrl) {
     cropperImage.src = dataUrl;
     cropperOverlay.classList.add('show');
-    const aspect = currentSection === 'boutique' ? 1 : currentSection === 'featured' ? 16 / 9 : 4 / 3;
+    const suggested = suggestedRatioFor(currentSection);
+    currentRatioValue = NaN; // toujours libre au départ, le format suggéré n'est qu'une proposition
+    renderRatioButtons(suggested);
     setTimeout(() => {
       if (cropperInstance) cropperInstance.destroy();
-      cropperInstance = new Cropper(cropperImage, { aspectRatio: aspect, viewMode: 1, autoCropArea: 1, background: false });
+      cropperInstance = new Cropper(cropperImage, { aspectRatio: NaN, viewMode: 1, autoCropArea: 0.9, background: false });
     }, 50);
   }
 
@@ -538,8 +582,18 @@
 
   document.getElementById('cropperConfirm').addEventListener('click', async () => {
     if (!cropperInstance) return;
-    const targetSize = currentSection === 'boutique' ? { width: 1000, height: 1000 } : currentSection === 'featured' ? { width: 1600, height: 900 } : { width: 1200, height: 900 };
-    const canvas = cropperInstance.getCroppedCanvas(targetSize);
+    const cropBox = cropperInstance.getData();
+    // La taille de sortie suit le recadrage réel choisi (libre ou format suggéré),
+    // plafonnée pour rester légère, sans jamais déformer l'image.
+    const MAX_DIM = 1600;
+    let outW = Math.round(cropBox.width);
+    let outH = Math.round(cropBox.height);
+    if (outW > MAX_DIM || outH > MAX_DIM) {
+      const scale = MAX_DIM / Math.max(outW, outH);
+      outW = Math.round(outW * scale);
+      outH = Math.round(outH * scale);
+    }
+    const canvas = cropperInstance.getCroppedCanvas({ width: outW, height: outH });
     canvas.toBlob(async (blob) => {
       closeCropper();
       uploadStatus.style.display = 'block';

@@ -99,7 +99,8 @@
   #featuredCarousel {
     position: relative;
     width: 100%;
-    height: 92vh;
+    aspect-ratio: 16 / 9;
+    max-height: 88vh;
     overflow: hidden;
     display: none;
     border-bottom: 2px solid var(--ink);
@@ -682,8 +683,10 @@
     const nav = document.getElementById('fcNav');
     const prevBtn = document.getElementById('fcPrev');
     const nextBtn = document.getElementById('fcNext');
+    const total = items.length;
 
-    track.innerHTML = items.map((item, i) => `
+    function slideHTML(item, i) {
+      return `
       <div class="fc-slide" data-index="${i}" style="background-image:url('${(item.images && item.images[0]) || ''}')">
         <div class="fc-content">
           <span class="fc-tag">À la une</span>
@@ -695,30 +698,78 @@
             ${item.button_value ? `<a class="fc-link" href="${item.button_value}" target="${item.button_value.startsWith('http') ? '_blank' : '_self'}" rel="noopener">Découvrir →</a>` : ''}
           </div>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }
+
+    // On ajoute un clone du premier élément à la fin : ça permet un défilement
+    // qui va toujours dans le même sens, même en boucle, sans jamais revenir en arrière.
+    const slidesHTML = items.map(slideHTML).join('') + slideHTML(items[0], 0).replace('data-index="0"', 'data-index="clone"');
+    track.innerHTML = slidesHTML;
 
     nav.innerHTML = items.map((_, i) => `<button type="button" class="fc-dot ${i === 0 ? 'active' : ''}" data-dot="${i}" aria-label="Aller à l'élément ${i + 1}"></button>`).join('');
 
-    let current = 0;
-    const total = items.length;
+    const allSlides = track.querySelectorAll('.fc-slide');
+    let current = 0; // 0..total-1 = vrais éléments, total = clone du premier
     let autoTimer = null;
+    let paused = false;
 
-    function goTo(index) {
-      current = ((index % total) + total) % total;
-      track.style.transform = `translateX(-${current * 100}%)`;
-      track.querySelectorAll('.fc-slide').forEach(s => s.classList.remove('expanded'));
-      nav.querySelectorAll('.fc-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+    function setPosition(index, animate = true) {
+      track.style.transition = animate ? 'transform 0.85s cubic-bezier(0.65, 0, 0.35, 1)' : 'none';
+      track.style.transform = `translateX(-${index * 100}%)`;
+    }
+
+    function updateDots(realIndex) {
+      nav.querySelectorAll('.fc-dot').forEach((d, i) => d.classList.toggle('active', i === realIndex));
+    }
+
+    function collapseAll() {
+      allSlides.forEach(s => s.classList.remove('expanded'));
+      track.querySelectorAll('.fc-toggle').forEach(btn => btn.innerHTML = 'Lire plus <span class="chev">▾</span>');
+    }
+
+    function advance() {
+      current += 1;
+      setPosition(current, true);
+      updateDots(current % total);
+
+      if (current === total) {
+        // On vient d'atteindre le clone (identique au premier) : dès que
+        // l'animation est finie, on saute silencieusement au vrai premier élément.
+        setTimeout(() => {
+          setPosition(0, false);
+          current = 0;
+        }, 860);
+      }
     }
 
     function startAuto() {
       if (autoTimer) clearInterval(autoTimer);
-      autoTimer = setInterval(() => goTo(current + 1), 5000);
+      if (paused) return;
+      autoTimer = setInterval(advance, 6500);
     }
 
-    function manualGoTo(index) {
-      goTo(index);
+    function stopAuto() {
+      if (autoTimer) clearInterval(autoTimer);
+      autoTimer = null;
+    }
+
+    function pauseTemporarily() {
+      paused = true;
+      stopAuto();
+    }
+
+    function resumeAuto() {
+      paused = false;
       startAuto();
+    }
+
+    // Navigation manuelle : va directement au bon élément (peut revenir en arrière, c'est volontaire)
+    function manualGoTo(realIndex) {
+      collapseAll();
+      current = ((realIndex % total) + total) % total;
+      setPosition(current, true);
+      updateDots(current);
+      resumeAuto();
     }
 
     prevBtn.addEventListener('click', () => manualGoTo(current - 1));
@@ -726,16 +777,34 @@
     nav.querySelectorAll('[data-dot]').forEach(dot => {
       dot.addEventListener('click', () => manualGoTo(parseInt(dot.dataset.dot)));
     });
+
+    // Lire plus / Réduire : coupe le défilement automatique tant que c'est ouvert
     track.querySelectorAll('[data-toggle]').forEach(btn => {
       btn.addEventListener('click', () => {
         const slide = btn.closest('.fc-slide');
-        slide.classList.toggle('expanded');
-        btn.innerHTML = slide.classList.contains('expanded') ? 'Réduire <span class="chev">▾</span>' : 'Lire plus <span class="chev">▾</span>';
+        const isExpanding = !slide.classList.contains('expanded');
+        collapseAll();
+        if (isExpanding) {
+          slide.classList.add('expanded');
+          btn.innerHTML = 'Réduire <span class="chev">▾</span>';
+          pauseTemporarily();
+        } else {
+          resumeAuto();
+        }
       });
     });
 
+    // Le doigt (ou la souris) posé sur le carrousel met le défilement en pause,
+    // il reprend automatiquement dès que le visiteur relâche.
+    carousel.addEventListener('touchstart', pauseTemporarily, { passive: true });
+    carousel.addEventListener('touchend', resumeAuto, { passive: true });
+    carousel.addEventListener('mousedown', pauseTemporarily);
+    carousel.addEventListener('mouseup', resumeAuto);
+    carousel.addEventListener('mouseenter', pauseTemporarily);
+    carousel.addEventListener('mouseleave', resumeAuto);
+
     carousel.style.display = 'block';
-    goTo(0);
+    setPosition(0, false);
     startAuto();
   })();
 </script>

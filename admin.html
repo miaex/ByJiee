@@ -180,7 +180,6 @@
 
   <div id="dashboardView"></div>
   <div id="listView" class="content-list" style="display:none;"></div>
-  <div id="featuredView" class="featured-form" style="display:none;"></div>
   <div id="messagesView" style="display:none;"></div>
 </main>
 
@@ -189,13 +188,24 @@
     <h2 id="modalTitle">Nouvel élément</h2>
     <form id="itemForm">
       <div class="field"><label for="fTitle">Titre</label><input type="text" id="fTitle" required></div>
-      <div class="field"><label for="fDesc">Description courte</label><textarea id="fDesc" required></textarea></div>
+      <div class="field"><label for="fDesc" id="fDescLabel">Description courte</label><textarea id="fDesc" required></textarea></div>
       <div class="field"><label for="fMeta">Info complémentaire (délai, garantie, statut...)</label><input type="text" id="fMeta" placeholder="Ex: Livraison sous 24h"></div>
 
       <div id="priceFieldWrap" style="display:none;">
         <div class="field">
           <label for="fPrice">Prix (en FCFA)</label>
           <input type="number" id="fPrice" placeholder="Ex: 15000" min="0" step="1">
+        </div>
+      </div>
+
+      <div id="featuredFieldWrap" style="display:none;">
+        <div class="field">
+          <label for="fFullText">Texte complet (affiché au clic)</label>
+          <textarea id="fFullText" placeholder="Le texte détaillé, article ou pub, qui se déplie quand le visiteur clique."></textarea>
+        </div>
+        <div class="field">
+          <label for="fFeaturedLink">Lien (optionnel)</label>
+          <input type="text" id="fFeaturedLink" placeholder="Ex: storysongs.html ou https://...">
         </div>
       </div>
 
@@ -276,7 +286,6 @@
   const sideNav = document.getElementById('sideNav');
   const dashboardView = document.getElementById('dashboardView');
   const listView = document.getElementById('listView');
-  const featuredView = document.getElementById('featuredView');
   const messagesView = document.getElementById('messagesView');
   const viewTitle = document.getElementById('viewTitle');
   const viewEyebrow = document.getElementById('viewEyebrow');
@@ -292,7 +301,7 @@
       }
       let badge = '';
       if (s.id === 'messages' && unreadCount > 0) badge = `<span class="badge-unread">${unreadCount}</span>`;
-      else if (itemCounts[s.id] !== undefined && s.id !== 'featured' && s.id !== 'dashboard' && s.id !== 'messages') badge = `<span class="badge-count">${itemCounts[s.id]}</span>`;
+      else if (itemCounts[s.id] !== undefined && s.id !== 'dashboard' && s.id !== 'messages') badge = `<span class="badge-count">${itemCounts[s.id]}</span>`;
       html += `<button class="nav-item ${currentSection === s.id ? 'active' : ''}" style="--c: var(${s.color})" data-id="${s.id}">
         <span class="dot"></span>${s.label}${badge}
       </button>`;
@@ -310,7 +319,6 @@
 
     dashboardView.style.display = 'none';
     listView.style.display = 'none';
-    featuredView.style.display = 'none';
     messagesView.style.display = 'none';
     addBtn.style.display = 'none';
 
@@ -319,11 +327,6 @@
       viewTitle.textContent = 'Tableau de bord';
       dashboardView.style.display = 'block';
       await renderDashboard();
-    } else if (sectionId === 'featured') {
-      viewEyebrow.textContent = 'Accueil';
-      viewTitle.textContent = 'À la une';
-      featuredView.style.display = 'block';
-      await renderFeaturedForm();
     } else if (sectionId === 'messages') {
       viewEyebrow.textContent = 'Autres';
       viewTitle.textContent = 'Messages reçus';
@@ -419,50 +422,6 @@
   function buttonTypeLabel(type) {
     const labels = { lien_externe: 'Lien externe', paiement: 'Paiement direct', whatsapp: 'WhatsApp', devis: 'Devis', indisponible: 'Indisponible' };
     return labels[type] || type;
-  }
-
-  async function renderFeaturedForm() {
-    featuredView.innerHTML = `<div class="loading-state">Chargement...</div>`;
-    const { data: featured } = await sb.from('featured').select('*').eq('id', 1).single();
-    const f = featured || { active: false, title: '', description: '', button_label: '', button_link: '' };
-
-    featuredView.innerHTML = `
-      <div class="toggle-row">
-        <label class="toggle-switch">
-          <input type="checkbox" id="featuredActive" ${f.active ? 'checked' : ''}>
-          <span class="toggle-slider"></span>
-        </label>
-        <span class="toggle-label" id="toggleLabelText">${f.active ? "Actif — visible sur l'accueil" : 'Inactif — masqué sur l\u2019accueil'}</span>
-      </div>
-      <div class="field"><label for="featuredTitle">Titre de l'offre</label><input type="text" id="featuredTitle" value="${(f.title || '').replace(/"/g,'&quot;')}" placeholder="Ex: Promo lancement StorySongs"></div>
-      <div class="field"><label for="featuredDesc">Description courte</label><textarea id="featuredDesc" placeholder="Ex: -20% ce mois-ci sur toute commande StorySongs">${f.description || ''}</textarea></div>
-      <div class="field"><label for="featuredBtnLabel">Texte du bouton</label><input type="text" id="featuredBtnLabel" value="${(f.button_label || '').replace(/"/g,'&quot;')}" placeholder="Ex: En profiter"></div>
-      <div class="field"><label for="featuredBtnLink">Lien du bouton</label><input type="text" id="featuredBtnLink" value="${(f.button_link || '').replace(/"/g,'&quot;')}" placeholder="Ex: storysongs.html"></div>
-      <button class="btn-primary" id="saveFeaturedBtn" style="border-radius:999px; padding:0.8rem 1.6rem;">Enregistrer</button>
-      <p class="upload-status" id="featuredSaved" style="display:none;">✓ Enregistré</p>
-    `;
-
-    const toggleInput = document.getElementById('featuredActive');
-    const toggleLabel = document.getElementById('toggleLabelText');
-    toggleInput.addEventListener('change', () => {
-      toggleLabel.textContent = toggleInput.checked ? "Actif — visible sur l'accueil" : "Inactif — masqué sur l'accueil";
-    });
-
-    document.getElementById('saveFeaturedBtn').addEventListener('click', async () => {
-      const payload = {
-        id: 1,
-        active: document.getElementById('featuredActive').checked,
-        title: document.getElementById('featuredTitle').value,
-        description: document.getElementById('featuredDesc').value,
-        button_label: document.getElementById('featuredBtnLabel').value,
-        button_link: document.getElementById('featuredBtnLink').value,
-        updated_at: new Date().toISOString(),
-      };
-      await sb.from('featured').upsert(payload);
-      const saved = document.getElementById('featuredSaved');
-      saved.style.display = 'block';
-      setTimeout(() => saved.style.display = 'none', 2500);
-    });
   }
 
   async function renderMessages() {
@@ -563,7 +522,7 @@
   function openCropper(dataUrl) {
     cropperImage.src = dataUrl;
     cropperOverlay.classList.add('show');
-    const aspect = currentSection === 'boutique' ? 1 : 4 / 3;
+    const aspect = currentSection === 'boutique' ? 1 : currentSection === 'featured' ? 16 / 9 : 4 / 3;
     setTimeout(() => {
       if (cropperInstance) cropperInstance.destroy();
       cropperInstance = new Cropper(cropperImage, { aspectRatio: aspect, viewMode: 1, autoCropArea: 1, background: false });
@@ -579,7 +538,7 @@
 
   document.getElementById('cropperConfirm').addEventListener('click', async () => {
     if (!cropperInstance) return;
-    const targetSize = currentSection === 'boutique' ? { width: 1000, height: 1000 } : { width: 1200, height: 900 };
+    const targetSize = currentSection === 'boutique' ? { width: 1000, height: 1000 } : currentSection === 'featured' ? { width: 1600, height: 900 } : { width: 1200, height: 900 };
     const canvas = cropperInstance.getCroppedCanvas(targetSize);
     canvas.toBlob(async (blob) => {
       closeCropper();
@@ -607,12 +566,20 @@
     fImages.value = '';
   });
 
+  const featuredFieldWrap = document.getElementById('featuredFieldWrap');
+  const fFullText = document.getElementById('fFullText');
+  const fFeaturedLink = document.getElementById('fFeaturedLink');
+  const fDescLabel = document.getElementById('fDescLabel');
+
   function openModal(item = null) {
     editingId = item ? item.id : null;
     modalImages = item && item.images ? [...item.images] : [];
     const isBoutique = currentSection === 'boutique';
+    const isFeatured = currentSection === 'featured';
     buttonConfigFields.style.display = isBoutique ? 'block' : 'none';
     priceFieldWrap.style.display = isBoutique ? 'block' : 'none';
+    featuredFieldWrap.style.display = isFeatured ? 'block' : 'none';
+    fDescLabel.textContent = isFeatured ? 'Accroche courte (visible sur l\u2019image)' : 'Description courte';
 
     if (item) {
       modalTitle.textContent = "Modifier l'élément";
@@ -622,6 +589,8 @@
       fPrice.value = item.price || '';
       fButtonType.value = item.button_type || '';
       fButtonValue.value = item.button_value || '';
+      fFullText.value = item.full_text || '';
+      fFeaturedLink.value = isFeatured ? (item.button_value || '') : '';
       fButtonType.dispatchEvent(new Event('change'));
     } else {
       modalTitle.textContent = 'Nouvel élément';
@@ -644,6 +613,7 @@
     saveBtn.disabled = true;
     saveBtn.textContent = 'Enregistrement...';
 
+    const isFeatured = currentSection === 'featured';
     const payload = {
       page_slug: currentSection,
       title: fTitle.value,
@@ -652,8 +622,9 @@
       price: currentSection === 'boutique' && fPrice.value ? parseFloat(fPrice.value) : null,
       currency: 'XOF',
       images: modalImages,
+      full_text: isFeatured ? fFullText.value : null,
       button_type: currentSection === 'boutique' ? (fButtonType.value || null) : null,
-      button_value: currentSection === 'boutique' ? (fButtonValue.value || null) : null,
+      button_value: currentSection === 'boutique' ? (fButtonValue.value || null) : (isFeatured ? (fFeaturedLink.value || null) : null),
     };
 
     if (editingId) {

@@ -733,7 +733,7 @@
     loginBtn.textContent = 'Se connecter';
 
     if (error) {
-      loginError.textContent = 'Email ou mot de passe incorrect.';
+      loginError.textContent = 'Erreur : ' + error.message;
       loginError.classList.add('show');
       loginPass.value = '';
     } else {

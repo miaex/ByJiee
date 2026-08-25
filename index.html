@@ -299,7 +299,6 @@
   @keyframes fadeUp { to { opacity: 1; } }
 
   .hero-cta {
-    margin-top: 2.2rem;
     display: inline-flex; align-items: center; gap: 0.6rem;
     padding: 1rem 1.8rem;
     background: var(--ink);
@@ -309,12 +308,44 @@
     font-family: 'Space Mono', monospace;
     font-weight: 700;
     font-size: 0.88rem;
-    opacity: 0;
-    animation: fadeUp 0.7s ease forwards;
-    animation-delay: 0.75s;
     transition: transform 0.2s, background 0.2s;
   }
   .hero-cta:hover { background: var(--magenta); transform: translateY(-3px) rotate(-1deg); }
+  .hero-cta.secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 2px solid var(--ink);
+  }
+  .hero-cta.secondary:hover { background: var(--ink); color: var(--paper); transform: translateY(-3px) rotate(1deg); }
+  .hero-cta-group {
+    margin-top: 2.2rem;
+    display: flex; gap: 0.9rem; flex-wrap: wrap; justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+    animation-delay: 0.75s;
+  }
+
+  .brand-subtitle {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: clamp(0.95rem, 2.2vw, 1.25rem);
+    color: var(--ink);
+    letter-spacing: 0.01em;
+    margin-top: 0.7rem;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+    animation-delay: 0.55s;
+  }
+  .signature-tagline {
+    margin-top: 0.9rem;
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: var(--ink-soft);
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+    animation-delay: 0.65s;
+  }
 
   .scroll-cue {
     position: absolute; bottom: 1.6rem; left: 50%; transform: translateX(-50%);
@@ -376,6 +407,44 @@
   }
   .stamp p { font-size: 0.93rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: 0.9rem; }
   .stamp .go { font-family: 'Space Mono', monospace; font-size: 0.76rem; font-weight: 700; color: var(--c); }
+
+  /* ---------- GALERIE ---------- */
+  .galerie-section { padding: 5rem 1.5rem; max-width: 1100px; margin: 0 auto; display: none; }
+  .galerie-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.3rem; margin-top: 2rem; }
+  .g-card {
+    position: relative; border: 2.5px solid var(--ink); border-radius: 16px; overflow: hidden;
+    background: var(--paper-alt); cursor: pointer;
+    opacity: 0; transform: translateY(24px) scale(0.96);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2,0.85,0.25,1.1), box-shadow 0.2s;
+    box-shadow: 4px 4px 0 var(--magenta);
+  }
+  .g-card:nth-child(3n+2) { box-shadow: 4px 4px 0 var(--blue); }
+  .g-card:nth-child(3n+3) { box-shadow: 4px 4px 0 var(--yellow); }
+  .g-card.in-view { opacity: 1; transform: translateY(0) scale(1); }
+  .g-card:hover { transform: translateY(-3px) scale(1.01); }
+  .g-media { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: var(--ink); }
+  .g-video-inline { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: var(--ink); }
+  .g-play-badge {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 54px; height: 54px; border-radius: 50%;
+    background: rgba(23,19,16,0.65); display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.3rem; pointer-events: none;
+  }
+  .g-caption { padding: 0.9rem 1rem 1rem; }
+  .g-caption h4 { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.05rem; margin-bottom: 0.2rem; }
+  .g-caption p { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.4; }
+  .g-tag { display: inline-block; font-family: 'Space Mono', monospace; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; background: var(--ink); color: white; padding: 0.15rem 0.5rem; border-radius: 999px; margin-bottom: 0.4rem; }
+
+  .g-lightbox {
+    position: fixed; inset: 0; background: rgba(11,10,9,0.92); z-index: 400;
+    display: none; align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  .g-lightbox.show { display: flex; }
+  .g-lightbox img, .g-lightbox video { max-width: 100%; max-height: 85vh; border-radius: 10px; }
+  .g-lightbox-close {
+    position: absolute; top: 1.2rem; right: 1.4rem; background: white; border: none;
+    width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
+  }
 
   .about { background: var(--ink); color: var(--paper); padding: 6rem 1.5rem; }
   .about-inner { max-width: 720px; margin: 0 auto; }
@@ -469,9 +538,15 @@
   </div>
 
   <div class="hero-content">
-    <h1 class="brand"><span>B</span><span>Y</span><span> </span><span>J</span><span>I</span><span>E</span><span>E</span></h1>
-    <p class="tagline">Design, musique, écriture, artisanat numérique et bien plus — un passeport de savoir-faire, tamponné projet après projet.</p>
-    <a class="hero-cta" href="#stamps">Explorer les compétences →</a>
+    <h1 class="brand">
+      <span>B</span><span>Y</span><span> </span><span>J</span><span>I</span><span>E</span><span>E</span>
+      <span class="brand-subtitle">Studio créatif : sites web, design, automatisation &amp; création</span>
+    </h1>
+    <p class="signature-tagline">Un créateur. Plusieurs territoires.</p>
+    <div class="hero-cta-group">
+      <a class="hero-cta" href="#stamps">Découvrir JIEE →</a>
+      <a class="hero-cta secondary" href="#contact">Demander un devis</a>
+    </div>
   </div>
   <div class="scroll-cue"><span>SCROLL</span><span class="dot"></span></div>
 </section>
@@ -551,11 +626,23 @@
   </div>
 </section>
 
+<section class="galerie-section" id="galerieSection">
+  <div class="eyebrow">Coulisses & réalisations</div>
+  <h2>Galerie</h2>
+  <p class="lead">Retours clients, avant/après, tutoriels — un aperçu concret du travail derrière JIEE.</p>
+  <div class="galerie-grid" id="galerieGrid"></div>
+</section>
+
+<div class="g-lightbox" id="gLightbox">
+  <button class="g-lightbox-close" id="gLightboxClose">✕</button>
+  <div id="gLightboxContent"></div>
+</div>
+
 <section class="about" id="about">
   <div class="about-inner">
     <div class="eyebrow">À propos</div>
     <h2>Né au Togo, autodidacte par nécessité et par goût.</h2>
-    <p>Je m'appelle Etso Komlan Jérémie — Jiee. Originaire du Togo, j'ai construit mes compétences seul, projet après projet : design, écriture, musique, artisanat numérique. Pas de diplôme technique, juste la volonté de comprendre et de faire, jusqu'à en faire un métier.</p>
+    <p>Autodidacte, Jérémie K. ETSO a développé son expertise à travers des projets concrets en design, numérique, écriture et création. Il a fondé JIEE pour donner une structure professionnelle à cette diversité de savoir-faire.</p>
     <p>Aujourd'hui, By Jiee réunit tout ce savoir-faire sous une seule signature — pour que chaque client trouve précisément ce dont il a besoin, sans se disperser dans le reste.</p>
     <div class="signature">— Jiee</div>
   </div>

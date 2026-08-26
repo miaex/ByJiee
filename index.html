@@ -744,12 +744,15 @@
   .about p { color: #D8D2C6; line-height: 1.75; font-size: 1.03rem; margin-bottom: 1rem; }
   .about .signature { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--magenta); margin-top: 1.6rem; }
 
-  .contact { max-width: 620px; margin: 0 auto; padding: 6rem 1.5rem; }
+  .contact { max-width: 720px; margin: 0 auto; padding: 6rem 1.5rem; }
   .contact h2 { font-family: 'Big Shoulders Display', sans-serif; font-size: clamp(1.9rem, 4.4vw, 2.6rem); margin-bottom: 0.6rem; }
   .contact > p { color: var(--ink-soft); margin-bottom: 2rem; }
   form { display: flex; flex-direction: column; gap: 1.1rem; }
   .field { display: flex; flex-direction: column; gap: 0.4rem; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+  @media (max-width: 620px) { .field-row { grid-template-columns: 1fr; } }
   label { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+  label .optional-tag { text-transform: none; font-weight: 400; opacity: 0.75; letter-spacing: 0; }
   input, select, textarea {
     background: var(--paper-alt);
     border: 2px solid var(--ink);
@@ -758,9 +761,15 @@
     color: var(--ink);
     font-family: 'Inter', sans-serif;
     font-size: 0.96rem;
+    width: 100%;
   }
   input:focus, select:focus, textarea:focus { outline: none; border-color: var(--magenta); box-shadow: 3px 3px 0 var(--magenta); }
   textarea { resize: vertical; min-height: 100px; }
+  .contact-form-intro {
+    font-family: 'Space Mono', monospace; font-size: 0.74rem; color: var(--ink-soft);
+    background: var(--paper-alt); border: 2px dashed var(--ink); border-radius: 12px;
+    padding: 0.75rem 1rem; margin-bottom: 0.4rem; line-height: 1.5;
+  }
   button.submit {
     margin-top: 0.6rem;
     background: var(--magenta); color: var(--paper-alt);
@@ -1131,37 +1140,96 @@
 <section class="contact" id="contact">
   <div class="eyebrow">Contact</div>
   <h2>Une idée en tête ?</h2>
-  <p>Un seul formulaire, pour tous les services. Dites-moi ce dont vous avez besoin.</p>
+  <p>Un seul formulaire, pour tous les services. Plus vous en dites, plus vite je peux revenir vers vous avec une proposition adaptée.</p>
   <form id="contactForm">
-    <div class="field">
-      <label for="service">Service souhaité</label>
-      <select id="service" name="service" required>
-        <option value="">— Choisir —</option>
-        <option value="graphisme">Graphisme</option>
-        <option value="storysongs">StorySongs</option>
-        <option value="amenagement">Aménagement paysager</option>
-        <option value="chatbots">Chatbots</option>
-        <option value="restauration">Restauration photo</option>
-        <option value="ecriture">Écriture</option>
-        <option value="webdesign">Site web</option>
-        <option value="yirmeya">YIRMEYA (vêtements)</option>
-        <option value="boutique">Produit digital</option>
-        <option value="autre">Autre / je ne sais pas encore</option>
-      </select>
+    <p class="contact-form-intro">2 minutes suffisent — ces infos me permettent de cadrer votre projet avant qu'on échange sur WhatsApp.</p>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="name">Nom</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+      </div>
     </div>
-    <div class="field">
-      <label for="name">Nom</label>
-      <input type="text" id="name" name="name" required>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="whatsapp">WhatsApp</label>
+        <input type="tel" id="whatsapp" name="whatsapp" placeholder="+229 00 00 00 00" required>
+      </div>
+      <div class="field">
+        <label for="company">Entreprise / activité <span class="optional-tag">(facultatif)</span></label>
+        <input type="text" id="company" name="company">
+      </div>
     </div>
-    <div class="field">
-      <label for="contactMethod">Email ou WhatsApp</label>
-      <input type="text" id="contactMethod" name="contactMethod" required>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="projectType">Type de projet</label>
+        <select id="projectType" name="projectType" required>
+          <option value="">— Choisir —</option>
+          <option value="personnel">Projet personnel</option>
+          <option value="pro">Projet professionnel / entreprise</option>
+          <option value="asso">Association / ONG / institution</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="service">Service recherché</label>
+        <select id="service" name="service" required>
+          <option value="">— Choisir —</option>
+          <option value="graphisme">Graphisme</option>
+          <option value="storysongs">StorySongs</option>
+          <option value="amenagement">Aménagement paysager</option>
+          <option value="chatbots">Chatbots</option>
+          <option value="restauration">Restauration photo</option>
+          <option value="ecriture">Écriture</option>
+          <option value="webdesign">Site web</option>
+          <option value="yirmeya">YIRMEYA (vêtements)</option>
+          <option value="boutique">Produit digital</option>
+          <option value="autre">Autre / je ne sais pas encore</option>
+        </select>
+      </div>
     </div>
+
     <div class="field">
-      <label for="message">Décrivez votre besoin</label>
-      <textarea id="message" name="message" required></textarea>
+      <label for="description">Description du projet</label>
+      <textarea id="description" name="description" placeholder="Contexte, objectif, ce que vous avez déjà, ce qu'il vous manque..." required></textarea>
     </div>
-    <button type="submit" class="submit">Envoyer la demande</button>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="budget">Budget approximatif</label>
+        <select id="budget" name="budget" required>
+          <option value="">— Choisir —</option>
+          <option value="-50k">Moins de 50 000 FCFA</option>
+          <option value="50-150k">50 000 – 150 000 FCFA</option>
+          <option value="150-500k">150 000 – 500 000 FCFA</option>
+          <option value="500k+">Plus de 500 000 FCFA</option>
+          <option value="adefinir">À définir ensemble</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="deadline">Délai souhaité</label>
+        <select id="deadline" name="deadline" required>
+          <option value="">— Choisir —</option>
+          <option value="urgent">Urgent (moins d'1 semaine)</option>
+          <option value="1-2sem">1 à 2 semaines</option>
+          <option value="2-4sem">2 à 4 semaines</option>
+          <option value="flexible">Flexible / pas de date précise</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="link">Lien vers site / réseaux sociaux <span class="optional-tag">(facultatif)</span></label>
+      <input type="text" id="link" name="link" placeholder="instagram.com/... ou site.com">
+    </div>
+
+    <button type="submit" class="submit">Demander un devis →</button>
     <p class="form-note" id="formNote">Ouverture de WhatsApp avec votre demande pré-remplie...</p>
   </form>
 </section>
@@ -1346,6 +1414,9 @@
   const form = document.getElementById('contactForm');
   const note = document.getElementById('formNote');
   const serviceSelect = document.getElementById('service');
+  const projectTypeSelect = document.getElementById('projectType');
+  const budgetSelect = document.getElementById('budget');
+  const deadlineSelect = document.getElementById('deadline');
 
   const WHATSAPP_NUMBER = '2290150303086'; // +229 01 50 30 30 86
   function buildWhatsAppLink(text) {
@@ -1361,9 +1432,9 @@
     try {
       await sbMsg.from('messages').insert({
         name: data.name || null,
-        contact: data.contactMethod || null,
+        contact: `Email: ${data.email || '-'} / WhatsApp: ${data.whatsapp || '-'}`,
         service: data.service || null,
-        message: data.message || null,
+        message: data.fullMessage || null,
       });
     } catch (err) {
       console.warn('Enregistrement du message impossible :', err);
@@ -1405,18 +1476,31 @@
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
     const serviceLabel = serviceSelect.options[serviceSelect.selectedIndex]?.text || data.service;
-
-    await recordSubmission(data);
+    const projectTypeLabel = projectTypeSelect.options[projectTypeSelect.selectedIndex]?.text || data.projectType;
+    const budgetLabel = budgetSelect.options[budgetSelect.selectedIndex]?.text || data.budget;
+    const deadlineLabel = deadlineSelect.options[deadlineSelect.selectedIndex]?.text || data.deadline;
 
     const lines = [
       `Bonjour, je vous contacte depuis le site By Jiee.`,
       ``,
-      `Service souhaité : ${serviceLabel}`,
       `Nom : ${data.name || '-'}`,
-      `Contact : ${data.contactMethod || '-'}`,
-      `Message : ${data.message || '-'}`,
-    ];
+      `Email : ${data.email || '-'}`,
+      `WhatsApp : ${data.whatsapp || '-'}`,
+      data.company ? `Entreprise / activité : ${data.company}` : null,
+      `Type de projet : ${projectTypeLabel}`,
+      `Service recherché : ${serviceLabel}`,
+      ``,
+      `Description du projet :`,
+      data.description || '-',
+      ``,
+      `Budget approximatif : ${budgetLabel}`,
+      `Délai souhaité : ${deadlineLabel}`,
+      data.link ? `Lien site / réseaux : ${data.link}` : null,
+    ].filter(Boolean);
     const text = lines.join('\n');
+
+    data.fullMessage = text;
+    await recordSubmission(data);
 
     note.classList.add('show');
     setTimeout(() => note.classList.remove('show'), 4000);

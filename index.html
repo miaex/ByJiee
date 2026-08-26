@@ -659,10 +659,39 @@
 
   /* ---------- GALERIE ---------- */
   .galerie-section { padding: 5rem 1.5rem; max-width: 1100px; margin: 0 auto; display: none; }
-  .galerie-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.3rem; margin-top: 2rem; }
+
+  .galerie-hints { margin-top: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  .galerie-hint {
+    display: flex; align-items: center; gap: 0.55rem;
+    font-family: 'Space Mono', monospace; font-size: 0.78rem; font-weight: 700;
+    color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .galerie-hint .g-hint-arrows { display: inline-flex; gap: 0.15rem; animation: g-hint-swipe 1.6s ease-in-out infinite; }
+  @keyframes g-hint-swipe {
+    0%, 100% { transform: translateX(0); opacity: 0.55; }
+    50% { transform: translateX(5px); opacity: 1; }
+  }
+  .galerie-hint.g-hint-tap svg { flex-shrink: 0; }
+
+  .galerie-scroll-wrap { position: relative; margin-top: 1.6rem; }
+  .galerie-grid {
+    display: flex; gap: 1.1rem;
+    overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory; scroll-padding-left: 0.2rem;
+    padding: 0.4rem 0.2rem 1.3rem;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+    scrollbar-width: thin; scrollbar-color: var(--ink) transparent;
+  }
+  .galerie-grid.g-dragging { cursor: grabbing; scroll-snap-type: none; }
+  .galerie-grid::-webkit-scrollbar { height: 7px; }
+  .galerie-grid::-webkit-scrollbar-track { background: transparent; }
+  .galerie-grid::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 999px; }
+
   .g-card {
-    position: relative; border: 2.5px solid var(--ink); border-radius: 16px; overflow: hidden;
-    background: var(--paper-alt); cursor: pointer;
+    position: relative; flex: 0 0 auto; width: min(230px, 62vw);
+    border: 2.5px solid var(--ink); border-radius: 16px; overflow: hidden;
+    background: var(--paper-alt); cursor: pointer; scroll-snap-align: start;
     opacity: 0; transform: translateY(24px) scale(0.96);
     transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2,0.85,0.25,1.1), box-shadow 0.2s;
     box-shadow: 4px 4px 0 var(--magenta);
@@ -671,8 +700,8 @@
   .g-card:nth-child(3n+3) { box-shadow: 4px 4px 0 var(--yellow); }
   .g-card.in-view { opacity: 1; transform: translateY(0) scale(1); }
   .g-card:hover { transform: translateY(-3px) scale(1.01); }
-  .g-media { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: var(--ink); }
-  .g-video-inline { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: var(--ink); }
+  .g-media { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; background: var(--ink); pointer-events: none; }
+  .g-video-inline { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; background: var(--ink); pointer-events: none; }
   .g-play-badge {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: 54px; height: 54px; border-radius: 50%;
@@ -684,6 +713,13 @@
   .g-caption p { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.4; }
   .g-tag { display: inline-block; font-family: 'Space Mono', monospace; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; background: var(--ink); color: white; padding: 0.15rem 0.5rem; border-radius: 999px; margin-bottom: 0.4rem; }
 
+  /* voile flou aux bords pour signaler qu'il y a du contenu caché à défiler */
+  .galerie-scroll-wrap::before, .galerie-scroll-wrap::after {
+    content: ''; position: absolute; top: 0.4rem; bottom: 1.3rem; width: 28px; z-index: 2; pointer-events: none;
+  }
+  .galerie-scroll-wrap::before { left: 0; background: linear-gradient(90deg, var(--paper) 0%, transparent 100%); }
+  .galerie-scroll-wrap::after { right: 0; background: linear-gradient(270deg, var(--paper) 0%, transparent 100%); }
+
   .g-lightbox {
     position: fixed; inset: 0; background: rgba(11,10,9,0.92); z-index: 400;
     display: none; align-items: center; justify-content: center; padding: 1.5rem;
@@ -692,7 +728,13 @@
   .g-lightbox img, .g-lightbox video { max-width: 100%; max-height: 85vh; border-radius: 10px; }
   .g-lightbox-close {
     position: absolute; top: 1.2rem; right: 1.4rem; background: white; border: none;
-    width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
+    width: 44px; height: 44px; border-radius: 50%; font-size: 1.3rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+  }
+  .g-lightbox-hint {
+    position: absolute; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+    font-family: 'Space Mono', monospace; font-size: 0.72rem; color: rgba(255,255,255,0.75);
+    text-transform: uppercase; letter-spacing: 0.03em; text-align: center;
   }
 
   .about { background: var(--ink); color: var(--paper); padding: 6rem 1.5rem; }
@@ -1054,12 +1096,26 @@
   <div class="eyebrow">Coulisses & réalisations</div>
   <h2>Galerie</h2>
   <p class="lead">Retours clients, avant/après, tutoriels — un aperçu concret du travail derrière JIEE.</p>
-  <div class="galerie-grid" id="galerieGrid"></div>
+
+  <div class="galerie-hints">
+    <div class="galerie-hint">
+      <span class="g-hint-arrows">←</span> Faites glisser pour découvrir plus <span class="g-hint-arrows">→</span>
+    </div>
+    <div class="galerie-hint g-hint-tap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11.24V7.5a2.5 2.5 0 0 1 5 0v3.74"/><path d="M14 10.5V6a2.5 2.5 0 0 1 5 0v8a6 6 0 0 1-6 6h-2a6 6 0 0 1-5.2-3l-1.6-2.8a2 2 0 0 1 3.2-2.4l1.6 1.7"/></svg>
+      Touchez une photo ou vidéo pour l'afficher en plein écran
+    </div>
+  </div>
+
+  <div class="galerie-scroll-wrap">
+    <div class="galerie-grid" id="galerieGrid"></div>
+  </div>
 </section>
 
 <div class="g-lightbox" id="gLightbox">
-  <button class="g-lightbox-close" id="gLightboxClose">✕</button>
+  <button class="g-lightbox-close" id="gLightboxClose" aria-label="Fermer">✕</button>
   <div id="gLightboxContent"></div>
+  <div class="g-lightbox-hint">Touchez la croix pour fermer et revenir à la galerie</div>
 </div>
 
 <section class="about" id="about">
@@ -1573,8 +1629,25 @@
     }, { threshold: 0.15 });
     grid.querySelectorAll('.g-card').forEach(el => gObserver.observe(el));
 
+    // Défilement horizontal à la souris (glisser-déposer) pour desktop,
+    // en plus du défilement tactile natif sur mobile
+    let isDown = false, dragged = false, startX = 0, scrollStart = 0;
+    grid.addEventListener('mousedown', (e) => {
+      isDown = true; dragged = false;
+      grid.classList.add('g-dragging');
+      startX = e.pageX; scrollStart = grid.scrollLeft;
+    });
+    window.addEventListener('mouseup', () => { isDown = false; grid.classList.remove('g-dragging'); });
+    window.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      const delta = e.pageX - startX;
+      if (Math.abs(delta) > 5) dragged = true;
+      grid.scrollLeft = scrollStart - delta;
+    });
+
     grid.querySelectorAll('.g-card').forEach(card => {
       card.addEventListener('click', () => {
+        if (dragged) { dragged = false; return; } // évite d'ouvrir le plein écran après un glissement
         const item = items[parseInt(card.dataset.index)];
 
         if (item.media_type === 'image') {
@@ -1601,6 +1674,12 @@
     });
     lightbox.addEventListener('click', (e) => {
       if (e.target === lightbox) {
+        lightbox.classList.remove('show');
+        lightboxContent.innerHTML = '';
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('show')) {
         lightbox.classList.remove('show');
         lightboxContent.innerHTML = '';
       }

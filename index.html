@@ -359,8 +359,51 @@
   }
   @keyframes bounceDot { 0%,100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
 
+  /* ---------- CE QUE JIEE PEUT FAIRE ---------- */
+  .categories-section { max-width: 1120px; margin: 0 auto; padding: 5.5rem 1.5rem 2rem; }
+  .categories-section .eyebrow { text-align: center; display: block; }
+  .categories-section h2 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 800; font-size: clamp(1.9rem, 4.4vw, 2.8rem);
+    text-align: center; margin: 0.6rem 0 2.6rem;
+  }
+  .categories-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.4rem;
+  }
+  .cat-card {
+    --c: var(--magenta);
+    background: var(--paper-alt);
+    border: 2.5px solid var(--ink);
+    border-radius: 18px;
+    padding: 1.8rem 1.6rem;
+    box-shadow: 5px 5px 0 var(--c);
+    opacity: 0;
+    transform: translateY(26px) scale(0.97);
+    transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2,0.85,0.25,1.1), box-shadow 0.2s;
+  }
+  .cat-card.in-view { opacity: 1; transform: translateY(0) scale(1); }
+  .cat-card:hover { transform: translateY(-4px); box-shadow: 8px 8px 0 var(--c); }
+  .cat-card .cat-eyebrow {
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--c);
+  }
+  .cat-card h3 {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.5rem;
+    margin: 0.5rem 0 0.7rem;
+  }
+  .cat-card p { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.55; margin-bottom: 1.1rem; }
+  .cat-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .cat-links a {
+    font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700;
+    color: var(--ink); text-decoration: none;
+    border: 2px solid var(--ink); border-radius: 999px;
+    padding: 0.4rem 0.85rem;
+    transition: background 0.15s, color 0.15s;
+  }
+  .cat-links a:hover { background: var(--c); border-color: var(--c); color: white; }
+
   .intro {
-    max-width: 720px; margin: 0 auto; padding: 6rem 1.5rem 3rem; text-align: center;
+    max-width: 720px; margin: 0 auto; padding: 3.5rem 1.5rem 3rem; text-align: center;
   }
   .intro h2 {
     font-family: 'Big Shoulders Display', sans-serif;
@@ -551,76 +594,77 @@
   <div class="scroll-cue"><span>SCROLL</span><span class="dot"></span></div>
 </section>
 
+<section class="categories-section">
+  <div class="eyebrow">Ce que JIEE peut faire</div>
+  <h2>Des solutions, pas juste des compétences</h2>
+  <div class="categories-grid">
+
+    <div class="cat-card" style="--c: var(--blue)">
+      <div class="cat-eyebrow">Solutions professionnelles</div>
+      <h3>Web</h3>
+      <p>Sites vitrines et expériences numériques sur mesure, pensés pour convertir vos visiteurs en clients.</p>
+      <div class="cat-links"><a href="webdesign.html">Sites web →</a></div>
+    </div>
+
+    <div class="cat-card" style="--c: var(--magenta)">
+      <div class="cat-eyebrow">Solutions professionnelles</div>
+      <h3>Design</h3>
+      <p>Identités visuelles, logos, supports graphiques, et restauration de vos photos les plus précieuses.</p>
+      <div class="cat-links">
+        <a href="graphisme.html">Graphisme →</a>
+        <a href="restauration.html">Restauration photo →</a>
+      </div>
+    </div>
+
+    <div class="cat-card" style="--c: var(--purple)">
+      <div class="cat-eyebrow">Solutions professionnelles</div>
+      <h3>IA & Automatisation</h3>
+      <p>Chatbots et automatisation pour répondre à vos clients pendant que vous gérez le reste de votre activité.</p>
+      <div class="cat-links"><a href="chatbots.html">Chatbots →</a></div>
+    </div>
+
+    <div class="cat-card" style="--c: var(--yellow)">
+      <div class="cat-eyebrow">Créations</div>
+      <h3>Création</h3>
+      <p>Chansons personnalisées, écriture sur commande, produits numériques — l'univers créatif de JIEE.</p>
+      <div class="cat-links">
+        <a href="storysongs.html">StorySongs →</a>
+        <a href="ecriture.html">Écriture →</a>
+        <a href="boutique.html">Boutique →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <section class="intro">
-  <div class="eyebrow">Le passeport</div>
-  <h2>Un créateur, plusieurs territoires.</h2>
-  <p>Chaque compétence ci-dessous est un territoire à part entière — sa propre page, son propre univers. Mais tout part du même point : la maison Jiee. Cliquez sur un tampon pour entrer.</p>
+  <div class="eyebrow">Autres territoires</div>
+  <h2>Au-delà des solutions JIEE</h2>
+  <p>Trois territoires à part, chacun avec sa propre identité — une boutique de créations numériques, un savoir-faire familial en aménagement, et une marque de vêtements en préparation.</p>
 </section>
 
 <section class="stamps-section" id="stamps">
-  <div class="stamps-grid">
+  <div class="stamps-grid stamps-grid-premium">
 
-    <a class="stamp" href="boutique.html" style="--c: var(--green); --tilt: -1deg">
+    <a class="stamp stamp-premium" href="boutique.html" style="--c: var(--green); --tilt: -1.5deg">
       <span class="dot-code">BQ · 09</span>
       <div class="skill-name">Boutique digitale</div>
-      <p>Mes produits numériques, disponibles directement en ligne.</p>
-      <span class="go">Voir la page →</span>
+      <p>Des créations numériques prêtes à l'emploi, disponibles directement en ligne — sans intermédiaire.</p>
+      <span class="go">Explorer la boutique →</span>
     </a>
 
-    <a class="stamp" href="graphisme.html" style="--c: var(--magenta); --tilt: -2deg">
-      <span class="dot-code">GR · 01</span>
-      <div class="skill-name">Graphisme</div>
-      <p>Logos, flyers, bannières, identité visuelle, au service de votre marque.</p>
-      <span class="go">Voir la page →</span>
-    </a>
-
-    <a class="stamp" href="storysongs.html" style="--c: var(--blue); --tilt: 1.5deg">
-      <span class="dot-code">SS · 02</span>
-      <div class="skill-name">StorySongs</div>
-      <p>Des chansons personnalisées sur-mesure, écrites et composées pour marquer un moment précis.</p>
-      <span class="go">Voir la page →</span>
-    </a>
-
-    <a class="stamp" href="amenagement.html" style="--c: var(--green); --tilt: -1deg">
+    <a class="stamp stamp-premium" href="amenagement.html" style="--c: var(--blue); --tilt: 1.2deg">
       <span class="dot-code">AM · 03</span>
       <div class="skill-name">Aménagement paysager</div>
-      <p>Conception d'espaces verts, savoir-faire familial transmis et appliqué à votre terrain.</p>
-      <span class="go">Voir la page →</span>
+      <p>Un savoir-faire familial, transmis et appliqué avec soin à votre terrain — de la conception à la réalisation.</p>
+      <span class="go">Découvrir le territoire →</span>
     </a>
 
-    <a class="stamp" href="chatbots.html" style="--c: var(--purple); --tilt: 2deg">
-      <span class="dot-code">CB · 04</span>
-      <div class="skill-name">Chatbots</div>
-      <p>Assistants automatisés pour votre activité — WhatsApp, service client, prise de commande.</p>
-      <span class="go">Voir la page →</span>
-    </a>
-
-    <a class="stamp" href="restauration.html" style="--c: var(--coral); --tilt: -1.5deg">
-      <span class="dot-code">RP · 05</span>
-      <div class="skill-name">Restauration photo</div>
-      <p>Vieilles photos abîmées, redonnées à la vie — réparation, colorisation, netteté restaurée.</p>
-      <span class="go">Voir la page →</span>
-    </a>
-
-    <a class="stamp" href="ecriture.html" style="--c: var(--yellow); --tilt: 1deg">
-      <span class="dot-code">EC · 06</span>
-      <div class="skill-name">Écriture</div>
-      <p>Nouvelles, romans, contenus sur commande — un style ancré dans le réel ouest-africain.</p>
-      <span class="go">Voir la page →</span>
-    </a>
-
-    <a class="stamp" href="webdesign.html" style="--c: var(--blue); --tilt: -2.5deg">
-      <span class="dot-code">WD · 07</span>
-      <div class="skill-name">Sites web</div>
-      <p>Sites et pages sur mesure pour entrepreneurs et créateurs, rapides à lancer.</p>
-      <span class="go">Voir la page →</span>
-    </a>
-
-    <a class="stamp" href="yirmeya.html" style="--c: var(--magenta); --tilt: 2deg">
+    <a class="stamp stamp-premium" href="yirmeya.html" style="--c: var(--magenta); --tilt: -1.8deg">
       <span class="dot-code">YR · 08</span>
       <div class="skill-name">YIRMEYA</div>
-      <p>Ma marque de vêtements — un nom qui cache une histoire.</p>
-      <span class="go">Voir la page →</span>
+      <p>Une marque de vêtements en préparation — un nom qui cache une histoire, bientôt révélée.</p>
+      <span class="go">Suivre le lancement →</span>
     </a>
 
   </div>
@@ -702,7 +746,7 @@
   };
   buildMarquee();
 
-  const stamps = document.querySelectorAll('.stamp');
+  const stamps = document.querySelectorAll('.stamp, .cat-card');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
       if (entry.isIntersecting) {

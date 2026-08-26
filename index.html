@@ -79,6 +79,109 @@
   nav ul li a:hover::after, nav ul li a:focus-visible::after { width: 100%; }
   @media (max-width: 780px) { nav ul { display: none; } }
 
+  /* ---------- MENU TOUTES LES PAGES ---------- */
+  .pages-toggle {
+    display: none;
+    align-items: center; justify-content: center;
+    width: 40px; height: 40px;
+    background: transparent;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 4px;
+    margin-left: 1rem;
+  }
+  .pages-toggle span {
+    display: block; width: 18px; height: 2px;
+    background: var(--ink);
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+  .pages-toggle.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .pages-toggle.is-open span:nth-child(2) { opacity: 0; }
+  .pages-toggle.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  .pages-bar {
+    position: relative;
+    z-index: 90;
+    margin-top: 3.4rem;
+    background: var(--paper-alt);
+    border-bottom: 2px solid var(--ink);
+    padding: 0.65rem 2rem;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 0.55rem 0;
+  }
+  .pages-bar a {
+    font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.02em; text-transform: uppercase;
+    color: var(--ink-soft); text-decoration: none;
+    padding: 0 0.7rem;
+    border-right: 1px solid rgba(23,19,16,0.15);
+    transition: color 0.15s;
+    white-space: nowrap;
+  }
+  .pages-bar a:last-child { border-right: none; }
+  .pages-bar a:hover, .pages-bar a:focus-visible { color: var(--magenta); }
+
+  .pages-drawer-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(11,10,9,0.55);
+    z-index: 199;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .pages-drawer-overlay.is-open { display: block; opacity: 1; }
+
+  .pages-drawer {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: min(320px, 82vw);
+    background: var(--paper);
+    border-left: 2px solid var(--ink);
+    z-index: 200;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.2,0.85,0.25,1);
+    overflow-y: auto;
+    padding: 1.4rem 1.5rem 2.5rem;
+  }
+  .pages-drawer.is-open { transform: translateX(0); }
+  .pages-drawer-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.4rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 2px solid var(--ink);
+  }
+  .pages-drawer-head span {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.15rem;
+  }
+  .pages-drawer-close {
+    background: transparent; border: 2px solid var(--ink); border-radius: 8px;
+    width: 32px; height: 32px; font-size: 1.1rem; line-height: 1; cursor: pointer;
+    color: var(--ink);
+  }
+  .pages-drawer-group { margin-bottom: 1.6rem; }
+  .pages-drawer-group h4 {
+    font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--magenta);
+    margin-bottom: 0.7rem;
+  }
+  .pages-drawer-group a {
+    display: block; text-decoration: none; color: var(--ink);
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.98rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(23,19,16,0.1);
+  }
+  .pages-drawer-group a:hover, .pages-drawer-group a:focus-visible { color: var(--magenta); }
+
+  @media (max-width: 780px) {
+    .pages-toggle { display: inline-flex; }
+    .pages-bar { display: none; }
+  }
+  @media (min-width: 781px) {
+    .pages-drawer, .pages-drawer-overlay { display: none; }
+    .marquee { margin-top: 0; }
+  }
+
   .marquee {
     margin-top: 3.4rem;
     background: var(--ink);
@@ -363,30 +466,40 @@
   .categories-backdrop {
     position: relative;
     margin: 1.5rem 0;
+    overflow: hidden;
   }
   .categories-backdrop::before {
     content: '';
     position: absolute; inset: 0;
     background:
-      radial-gradient(ellipse 130% 100% at 50% 50%, rgba(23,19,16,0.94) 0%, rgba(23,19,16,0.88) 42%, rgba(23,19,16,0) 100%),
-      repeating-linear-gradient(135deg, rgba(255,255,255,0.028) 0px, rgba(255,255,255,0.028) 1px, transparent 1px, transparent 16px);
+      radial-gradient(ellipse 65% 40% at 50% 100%, rgba(190,236,255,0.32) 0%, rgba(190,236,255,0) 72%),
+      radial-gradient(ellipse 55% 38% at 15% 90%, rgba(52,87,232,0.24) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 42% at 88% 96%, rgba(123,63,228,0.16) 0%, transparent 72%),
+      linear-gradient(180deg, #0A0908 0%, #12141C 24%, #0D2536 50%, #0E3B4C 76%, #1E6478 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .categories-backdrop::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 12% 58%, rgba(255,255,255,0.85), transparent),
+      radial-gradient(1px 1px at 24% 74%, rgba(255,255,255,0.55), transparent),
+      radial-gradient(1.5px 1.5px at 36% 52%, rgba(255,255,255,0.65), transparent),
+      radial-gradient(1px 1px at 50% 80%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(2px 2px at 62% 64%, rgba(255,255,255,0.8), transparent),
+      radial-gradient(1px 1px at 72% 88%, rgba(255,255,255,0.45), transparent),
+      radial-gradient(1.5px 1.5px at 84% 58%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1px 1px at 92% 80%, rgba(255,255,255,0.45), transparent),
+      radial-gradient(1px 1px at 8% 38%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px at 46% 32%, rgba(255,255,255,0.25), transparent),
+      radial-gradient(1px 1px at 68% 26%, rgba(255,255,255,0.25), transparent);
+    background-repeat: no-repeat;
     pointer-events: none;
     z-index: 0;
   }
   .categories-section {
     position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 5.5rem 1.5rem 4.5rem;
-  }
-  .categories-section::before {
-    content: '';
-    position: absolute;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
-    width: 100vw; height: 145%;
-    background:
-      repeating-linear-gradient(45deg, rgba(255,255,255,0.028) 0px, rgba(255,255,255,0.028) 1px, transparent 1px, transparent 16px),
-      radial-gradient(ellipse at center, rgba(23,19,16,0.95) 0%, rgba(23,19,16,0.88) 32%, rgba(23,19,16,0.5) 58%, rgba(23,19,16,0) 82%);
-    z-index: -1;
-    pointer-events: none;
   }
   .categories-section .eyebrow, .categories-section h2 { position: relative; }
   .categories-section h2 { color: var(--paper); }
@@ -630,7 +743,51 @@
     <li><a href="#about">À propos</a></li>
     <li><a href="#contact" id="navContactLink">Contact</a></li>
   </ul>
+  <button type="button" class="pages-toggle" id="pagesToggle" aria-label="Toutes les pages" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<nav class="pages-bar" aria-label="Toutes les pages du site">
+  <a href="webdesign.html">Sites web</a>
+  <a href="graphisme.html">Graphisme</a>
+  <a href="restauration.html">Restauration photo</a>
+  <a href="chatbots.html">Chatbots</a>
+  <a href="storysongs.html">StorySongs</a>
+  <a href="ecriture.html">Écriture</a>
+  <a href="boutique.html">Boutique digitale</a>
+  <a href="amenagement.html">Aménagement paysager</a>
+  <a href="yirmeya.html">YIRMEYA</a>
+</nav>
+
+<div class="pages-drawer-overlay" id="pagesOverlay"></div>
+<div class="pages-drawer" id="pagesDrawer" aria-hidden="true">
+  <div class="pages-drawer-head">
+    <span>Toutes les pages</span>
+    <button type="button" class="pages-drawer-close" id="pagesDrawerClose" aria-label="Fermer">✕</button>
+  </div>
+  <div class="pages-drawer-group">
+    <h4>Compétences</h4>
+    <a href="webdesign.html">Sites web</a>
+    <a href="graphisme.html">Graphisme</a>
+    <a href="restauration.html">Restauration photo</a>
+    <a href="chatbots.html">Chatbots</a>
+    <a href="storysongs.html">StorySongs</a>
+    <a href="ecriture.html">Écriture</a>
+  </div>
+  <div class="pages-drawer-group">
+    <h4>Autres territoires</h4>
+    <a href="boutique.html">Boutique digitale</a>
+    <a href="amenagement.html">Aménagement paysager</a>
+    <a href="yirmeya.html">YIRMEYA</a>
+  </div>
+  <div class="pages-drawer-group">
+    <h4>Le site</h4>
+    <a href="index.html#stamps">Compétences (accueil)</a>
+    <a href="index.html#about">À propos</a>
+    <a href="index.html#contact">Contact</a>
+  </div>
+</div>
 
 <div class="marquee">
   <div class="marquee-track" id="marqueeTrack"></div>
@@ -724,6 +881,7 @@
 
   </div>
 </section>
+</div>
 
 <section class="intro">
   <div class="eyebrow">Autres territoires</div>
@@ -833,6 +991,34 @@
     track.innerHTML = html;
   };
   buildMarquee();
+
+  const pagesToggle = document.getElementById('pagesToggle');
+  const pagesDrawer = document.getElementById('pagesDrawer');
+  const pagesOverlay = document.getElementById('pagesOverlay');
+  const pagesDrawerClose = document.getElementById('pagesDrawerClose');
+  const openPagesDrawer = () => {
+    pagesDrawer.classList.add('is-open');
+    pagesOverlay.classList.add('is-open');
+    pagesToggle.classList.add('is-open');
+    pagesDrawer.setAttribute('aria-hidden', 'false');
+    pagesToggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  };
+  const closePagesDrawer = () => {
+    pagesDrawer.classList.remove('is-open');
+    pagesOverlay.classList.remove('is-open');
+    pagesToggle.classList.remove('is-open');
+    pagesDrawer.setAttribute('aria-hidden', 'true');
+    pagesToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  };
+  pagesToggle.addEventListener('click', () => {
+    pagesDrawer.classList.contains('is-open') ? closePagesDrawer() : openPagesDrawer();
+  });
+  pagesOverlay.addEventListener('click', closePagesDrawer);
+  pagesDrawerClose.addEventListener('click', closePagesDrawer);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePagesDrawer(); });
+  window.addEventListener('resize', () => { if (window.innerWidth > 780) closePagesDrawer(); });
 
   const stamps = document.querySelectorAll('.stamp, .cat-card');
   const observer = new IntersectionObserver((entries) => {

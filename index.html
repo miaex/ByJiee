@@ -731,6 +731,106 @@
 
   footer { text-align: center; padding: 3rem 1.5rem; border-top: 2px solid var(--ink); }
   footer p { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--ink-soft); }
+
+  /* ---------- POURQUOI JIEE ---------- */
+  .why-section { max-width: 1120px; margin: 0 auto; padding: 1rem 1.5rem 5.5rem; }
+  .why-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.3rem;
+    margin-top: 2.6rem;
+  }
+  @media (max-width: 980px) { .why-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .why-grid { grid-template-columns: 1fr; } }
+  .why-card {
+    --c: var(--blue);
+    background: var(--paper-alt);
+    border: 2.5px solid var(--ink);
+    border-radius: 18px;
+    padding: 1.6rem 1.4rem;
+    box-shadow: 5px 5px 0 var(--c);
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+    transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2,0.85,0.25,1.1), box-shadow 0.2s;
+  }
+  .why-card.in-view { opacity: 1; transform: translateY(0) scale(1); }
+  .why-card:hover { transform: translateY(-4px); box-shadow: 8px 8px 0 var(--c); }
+  .why-card .why-num {
+    font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.1em; color: var(--c);
+  }
+  .why-card h3 {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.28rem;
+    margin: 0.6rem 0 0.6rem; line-height: 1.15;
+  }
+  .why-card p { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.55; }
+
+  /* ---------- FOOTER ---------- */
+  footer.site-footer {
+    text-align: left; padding: 4.5rem 1.5rem 0; border-top: 2px solid var(--ink);
+    background: var(--ink); color: var(--paper);
+  }
+  .footer-inner { max-width: 1120px; margin: 0 auto; }
+  .footer-top { max-width: 520px; margin-bottom: 3rem; }
+  .footer-top .logo-line {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 1.4rem;
+  }
+  .footer-top .logo-line span { color: var(--magenta); }
+  .footer-top p { color: #D8D2C6; font-size: 0.95rem; line-height: 1.6; margin-top: 0.8rem; }
+  .footer-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.2rem;
+    padding-bottom: 3rem; border-bottom: 1px solid rgba(251,246,236,0.15);
+  }
+  @media (max-width: 780px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
+  .footer-col h4 {
+    font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--yellow);
+    margin-bottom: 1rem;
+  }
+  .footer-col a, .footer-col p {
+    display: block; color: #D8D2C6; text-decoration: none; font-size: 0.92rem;
+    margin-bottom: 0.65rem; line-height: 1.5;
+  }
+  .footer-col a:hover, .footer-col a:focus-visible { color: var(--magenta); }
+  .footer-col .soon { color: #8A8377; font-style: italic; }
+  .footer-social { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.2rem; }
+  .footer-social a {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1.5px solid rgba(251,246,236,0.3);
+    font-size: 1rem; margin: 0;
+  }
+  .footer-social a:hover { border-color: var(--magenta); background: rgba(230,59,143,0.12); }
+
+  .footer-faq { padding: 3rem 0; border-bottom: 1px solid rgba(251,246,236,0.15); }
+  .footer-faq h4 {
+    font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--yellow);
+    margin-bottom: 1.2rem;
+  }
+  .faq-item { border-bottom: 1px solid rgba(251,246,236,0.15); }
+  .faq-item:first-of-type { border-top: 1px solid rgba(251,246,236,0.15); }
+  .faq-question {
+    width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+    padding: 1rem 0; color: var(--paper);
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.98rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .faq-question .chev { transition: transform 0.25s ease; color: var(--magenta); flex-shrink: 0; }
+  .faq-item.is-open .faq-question .chev { transform: rotate(45deg); }
+  .faq-answer {
+    max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+  }
+  .faq-answer p { color: #D8D2C6; font-size: 0.92rem; line-height: 1.6; padding-bottom: 1.1rem; }
+  .faq-item.is-open .faq-answer { max-height: 240px; }
+
+  .footer-bottom {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 0.8rem; padding: 1.6rem 0;
+  }
+  .footer-bottom p { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: #8A8377; margin: 0; }
+  .footer-legal { display: flex; flex-wrap: wrap; gap: 1.2rem; }
+  .footer-legal a { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: #8A8377; text-decoration: none; }
+  .footer-legal a:hover { color: var(--paper); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -839,7 +939,7 @@
 </section>
 
 <div class="categories-backdrop">
-<section class="categories-section">
+<section class="categories-section" id="services">
   <div class="eyebrow">Ce que JIEE peut faire</div>
   <h2>Des solutions, pas juste des compétences</h2>
   <div class="categories-grid">
@@ -916,6 +1016,36 @@
   </div>
 </section>
 
+<section class="why-section" id="pourquoi">
+  <div class="intro" style="padding-bottom: 0;">
+    <div class="eyebrow">Pourquoi JIEE ?</div>
+    <h2>Pourquoi pas une agence plus grosse ?</h2>
+    <p>Bonne question. Voici, sans survendre, ce qui change réellement quand vous travaillez avec un créateur plutôt qu'une structure classique.</p>
+  </div>
+  <div class="why-grid">
+    <div class="why-card" style="--c: var(--blue)">
+      <div class="why-num">01</div>
+      <h3>Vision créative multidisciplinaire</h3>
+      <p>Design, code, écriture, image : une seule tête qui pense le projet dans son ensemble, pas des services cloisonnés qui se relaient.</p>
+    </div>
+    <div class="why-card" style="--c: var(--magenta)">
+      <div class="why-num">02</div>
+      <h3>Interlocuteur direct et réactif</h3>
+      <p>Vous parlez directement à la personne qui conçoit et réalise — pas à un chef de projet qui transmet vos messages avec un jour de retard.</p>
+    </div>
+    <div class="why-card" style="--c: var(--yellow)">
+      <div class="why-num">03</div>
+      <h3>Approche sur-mesure</h3>
+      <p>Chaque projet part de votre besoin réel, pas d'un template recyclé qu'on habille à vos couleurs.</p>
+    </div>
+    <div class="why-card" style="--c: var(--purple)">
+      <div class="why-num">04</div>
+      <h3>Créativité + outils numériques modernes</h3>
+      <p>La preuve tient dans vos mains : ce site est conçu, pensé et entretenu avec les mêmes exigences que vos futurs projets.</p>
+    </div>
+  </div>
+</section>
+
 <section class="galerie-section" id="galerieSection">
   <div class="eyebrow">Coulisses & réalisations</div>
   <h2>Galerie</h2>
@@ -976,8 +1106,89 @@
   </form>
 </section>
 
-<footer>
-  <p>BY JIEE — CALAVI, BÉNIN — © 2026</p>
+<footer class="site-footer">
+  <div class="footer-inner">
+
+    <div class="footer-top">
+      <div class="logo-line">BY <span>JIEE</span></div>
+      <p>Un créateur, plusieurs savoir-faire. Une seule adresse pour vos projets créatifs et numériques — du premier échange à la livraison.</p>
+    </div>
+
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="index.html">Accueil</a>
+        <a href="index.html#services">Services</a>
+        <a href="index.html#galerieSection">Projets</a>
+        <a href="index.html#about">À propos</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Compétences</h4>
+        <a href="webdesign.html">Sites web</a>
+        <a href="graphisme.html">Graphisme</a>
+        <a href="chatbots.html">Chatbots</a>
+        <a href="storysongs.html">StorySongs</a>
+      </div>
+      <div class="footer-col">
+        <h4>Autres territoires</h4>
+        <a href="boutique.html">Boutique digitale</a>
+        <a href="amenagement.html">Aménagement paysager</a>
+        <a href="yirmeya.html">YIRMEYA</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="#" id="footerWhatsapp">WhatsApp</a>
+        <p class="soon">Email pro — bientôt disponible</p>
+        <div class="footer-social">
+          <a href="javascript:void(0);" aria-label="Instagram" title="Instagram — lien à venir">IG</a>
+          <a href="javascript:void(0);" aria-label="Facebook" title="Facebook — lien à venir">FB</a>
+          <a href="javascript:void(0);" aria-label="TikTok" title="TikTok — lien à venir">TT</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-faq">
+      <h4>Questions fréquentes</h4>
+      <div class="faq-item">
+        <button type="button" class="faq-question">
+          Comment se déroule une collaboration ?
+          <span class="chev">+</span>
+        </button>
+        <div class="faq-answer"><p>Vous décrivez votre besoin via le formulaire ou WhatsApp, on échange pour le cadrer précisément, puis vient la proposition avant la réalisation.</p></div>
+      </div>
+      <div class="faq-item">
+        <button type="button" class="faq-question">
+          Travaillez-vous à distance ?
+          <span class="chev">+</span>
+        </button>
+        <div class="faq-answer"><p>Oui, l'essentiel des projets se fait entièrement à distance, où que vous soyez.</p></div>
+      </div>
+      <div class="faq-item">
+        <button type="button" class="faq-question">
+          Quels sont les délais habituels ?
+          <span class="chev">+</span>
+        </button>
+        <div class="faq-answer"><p>Ça dépend du service et de l'ampleur du projet — un délai clair vous est communiqué dès le premier échange.</p></div>
+      </div>
+      <div class="faq-item">
+        <button type="button" class="faq-question">
+          Comment se passe le paiement ?
+          <span class="chev">+</span>
+        </button>
+        <div class="faq-answer"><p>Les modalités sont discutées au cas par cas selon le service, directement via WhatsApp.</p></div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>BY JIEE — CALAVI, BÉNIN — © 2026</p>
+      <div class="footer-legal">
+        <a href="javascript:void(0);">Mentions légales</a>
+        <a href="javascript:void(0);">Politique de confidentialité</a>
+      </div>
+    </div>
+
+  </div>
 </footer>
 
 <script>
@@ -1020,7 +1231,7 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePagesDrawer(); });
   window.addEventListener('resize', () => { if (window.innerWidth > 780) closePagesDrawer(); });
 
-  const stamps = document.querySelectorAll('.stamp, .cat-card');
+  const stamps = document.querySelectorAll('.stamp, .cat-card, .why-card');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
       if (entry.isIntersecting) {
@@ -1082,6 +1293,22 @@
     navContactLink.setAttribute('target', '_blank');
     navContactLink.setAttribute('rel', 'noopener');
   }
+
+  const footerWhatsapp = document.getElementById('footerWhatsapp');
+  if (footerWhatsapp) {
+    footerWhatsapp.setAttribute('href', buildWhatsAppLink("Bonjour, je viens du site By Jiee et j'aimerais avoir plus d'informations."));
+    footerWhatsapp.setAttribute('target', '_blank');
+    footerWhatsapp.setAttribute('rel', 'noopener');
+  }
+
+  document.querySelectorAll('.faq-item').forEach((item) => {
+    const question = item.querySelector('.faq-question');
+    question.addEventListener('click', () => {
+      const wasOpen = item.classList.contains('is-open');
+      document.querySelectorAll('.faq-item.is-open').forEach((open) => open.classList.remove('is-open'));
+      if (!wasOpen) item.classList.add('is-open');
+    });
+  });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

@@ -936,6 +936,99 @@
     setPosition(0, false);
     startAuto();
   })();
+
+  // ---------- GALERIE (photos & vidéos) ----------
+  (async function loadGalerie() {
+    const { data: items, error } = await sbMsg.from('content_items').select('*').eq('page_slug', 'galerie').order('created_at', { ascending: true });
+    if (error || !items || items.length === 0) return;
+
+    const section = document.getElementById('galerieSection');
+    const grid = document.getElementById('galerieGrid');
+    const lightbox = document.getElementById('gLightbox');
+    const lightboxContent = document.getElementById('gLightboxContent');
+    const lightboxClose = document.getElementById('gLightboxClose');
+
+    function extractYouTubeId(url) {
+      const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
+    function cardFor(item, i) {
+      const isVideo = item.media_type === 'video_upload' || item.media_type === 'video_link';
+      let mediaHTML = '';
+
+      if (item.media_type === 'image') {
+        const src = (item.images && item.images[0]) || '';
+        mediaHTML = `<img class="g-media" src="${src}" alt="${item.title || ''}" loading="lazy">`;
+      } else if (item.media_type === 'video_upload') {
+        mediaHTML = `<video class="g-video-inline" src="${item.video_url || ''}" muted playsinline preload="metadata"></video>`;
+      } else if (item.media_type === 'video_link') {
+        const ytId = extractYouTubeId(item.video_url || '');
+        const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '';
+        mediaHTML = thumb
+          ? `<img class="g-media" src="${thumb}" alt="${item.title || ''}" loading="lazy">`
+          : `<div class="g-media" style="display:flex;align-items:center;justify-content:center;color:white;font-family:'Space Mono',monospace;font-size:0.75rem;text-align:center;padding:1rem;">Vidéo externe<br>${item.title || ''}</div>`;
+      }
+
+      return `
+        <div class="g-card" data-index="${i}">
+          ${mediaHTML}
+          ${isVideo ? `<span class="g-play-badge">▶</span>` : ''}
+          ${item.title || item.description ? `<div class="g-caption">
+            ${item.title ? `<h4>${item.title}</h4>` : ''}
+            ${item.description ? `<p>${item.description}</p>` : ''}
+          </div>` : ''}
+        </div>`;
+    }
+
+    grid.innerHTML = items.map(cardFor).join('');
+
+    // Animation d'apparition au scroll, comme le reste du site
+    const gObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('in-view'), i * 70);
+          gObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    grid.querySelectorAll('.g-card').forEach(el => gObserver.observe(el));
+
+    grid.querySelectorAll('.g-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const item = items[parseInt(card.dataset.index)];
+
+        if (item.media_type === 'image') {
+          lightboxContent.innerHTML = `<img src="${(item.images && item.images[0]) || ''}" alt="${item.title || ''}">`;
+        } else if (item.media_type === 'video_upload') {
+          lightboxContent.innerHTML = `<video src="${item.video_url || ''}" controls autoplay playsinline></video>`;
+        } else if (item.media_type === 'video_link') {
+          const ytId = extractYouTubeId(item.video_url || '');
+          if (ytId) {
+            lightboxContent.innerHTML = `<iframe width="100%" height="500" style="max-width:900px; border-radius:10px; border:none;" src="https://www.youtube.com/embed/${ytId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+          } else {
+            // Instagram, TikTok ou autre : pas d'aperçu intégré simple, on ouvre directement
+            window.open(item.video_url, '_blank', 'noopener');
+            return;
+          }
+        }
+        lightbox.classList.add('show');
+      });
+    });
+
+    lightboxClose.addEventListener('click', () => {
+      lightbox.classList.remove('show');
+      lightboxContent.innerHTML = '';
+    });
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        lightbox.classList.remove('show');
+        lightboxContent.innerHTML = '';
+      }
+    });
+
+    section.style.display = 'block';
+  })();
 </script>
 
 </body>

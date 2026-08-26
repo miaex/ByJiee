@@ -742,7 +742,21 @@
   .about .eyebrow { color: var(--yellow); }
   .about h2 { font-family: 'Big Shoulders Display', sans-serif; font-size: clamp(1.9rem, 4.4vw, 2.6rem); margin-bottom: 1.2rem; }
   .about p { color: #D8D2C6; line-height: 1.75; font-size: 1.03rem; margin-bottom: 1rem; }
-  .about .signature { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--magenta); margin-top: 1.6rem; }
+  .about .about-tagline { color: var(--paper); font-weight: 700; }
+  .about .signature { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--magenta); margin-top: 0.6rem; }
+
+  .about-more { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.45s ease, opacity 0.35s ease; }
+  .about-more.is-open { opacity: 1; }
+  .about-toggle {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    background: none; border: none; cursor: pointer; padding: 0.3rem 0 0.3rem;
+    font-family: 'Space Mono', monospace; font-size: 0.78rem; font-weight: 700;
+    color: var(--yellow); text-transform: uppercase; letter-spacing: 0.05em;
+    margin-top: 0.2rem;
+  }
+  .about-toggle .chev { transition: transform 0.3s ease; display: inline-flex; }
+  .about-toggle.is-open .chev { transform: rotate(180deg); }
+  .about-toggle:hover { color: var(--paper); }
 
   .contact { max-width: 720px; margin: 0 auto; padding: 6rem 1.5rem; }
   .contact h2 { font-family: 'Big Shoulders Display', sans-serif; font-size: clamp(1.9rem, 4.4vw, 2.6rem); margin-bottom: 0.6rem; }
@@ -1130,10 +1144,25 @@
 <section class="about" id="about">
   <div class="about-inner">
     <div class="eyebrow">À propos</div>
-    <h2>Né au Togo, autodidacte par nécessité et par goût.</h2>
-    <p>Autodidacte, Jérémie K. ETSO a développé son expertise à travers des projets concrets en design, numérique, écriture et création. Il a fondé JIEE pour donner une structure professionnelle à cette diversité de savoir-faire.</p>
-    <p>Aujourd'hui, By Jiee réunit tout ce savoir-faire sous une seule signature — pour que chaque client trouve précisément ce dont il a besoin, sans se disperser dans le reste.</p>
-    <div class="signature">— Jiee</div>
+    <h2>Une expertise plurielle. Une exigence unique.</h2>
+
+    <p>Jérémie K. ETSO est un créateur indépendant à la croisée du design, du numérique, de la création de contenu et de l’écriture.</p>
+    <p>Son parcours s’est construit autour d’une conviction simple : la maîtrise ne se résume pas à un titre, elle se démontre par ce que l’on est capable de concevoir, de créer et de mener à terme.</p>
+    <p>Au fil de projets concrets, il a développé une expertise dans plusieurs domaines complémentaires : identité visuelle, design graphique, création numérique, développement web, solutions no-code et IA, rédaction et création artistique. Cette polyvalence lui permet d’aborder chaque projet avec une vision à la fois créative, technique et stratégique.</p>
+
+    <div class="about-more" id="aboutMore">
+      <p>JIEE est né de cette vision.</p>
+      <p>Plus qu’une simple signature, By Jiee rassemble ces différentes compétences au sein d’un même univers : une approche où chaque projet bénéficie d’une attention particulière portée à la qualité, à la cohérence et au résultat.</p>
+      <p>L’objectif est simple : comprendre le besoin, maîtriser la réalisation et livrer une expérience à la hauteur des attentes.</p>
+      <p class="about-tagline">Une signature. Plusieurs expertises. Un même niveau d’exigence.</p>
+    </div>
+
+    <button type="button" class="about-toggle" id="aboutToggle" aria-expanded="false" aria-controls="aboutMore">
+      <span class="label">Lire plus</span>
+      <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+
+    <div class="signature">— Jérémie K. ETSO</div>
   </div>
 </section>
 
@@ -1470,6 +1499,18 @@
       if (!wasOpen) item.classList.add('is-open');
     });
   });
+
+  const aboutToggle = document.getElementById('aboutToggle');
+  const aboutMore = document.getElementById('aboutMore');
+  if (aboutToggle && aboutMore) {
+    aboutToggle.addEventListener('click', () => {
+      const isOpen = aboutMore.classList.toggle('is-open');
+      aboutToggle.classList.toggle('is-open', isOpen);
+      aboutToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      aboutToggle.querySelector('.label').textContent = isOpen ? 'Lire moins' : 'Lire plus';
+      aboutMore.style.maxHeight = isOpen ? aboutMore.scrollHeight + 'px' : '0px';
+    });
+  }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

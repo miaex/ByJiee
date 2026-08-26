@@ -360,29 +360,67 @@
   @keyframes bounceDot { 0%,100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
 
   /* ---------- CE QUE JIEE PEUT FAIRE ---------- */
-  .categories-section { max-width: 1120px; margin: 0 auto; padding: 5.5rem 1.5rem 2rem; }
-  .categories-section .eyebrow { text-align: center; display: block; }
+  .categories-backdrop {
+    position: relative;
+    margin: 1.5rem 0;
+  }
+  .categories-backdrop::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 130% 100% at 50% 50%, rgba(23,19,16,0.94) 0%, rgba(23,19,16,0.88) 42%, rgba(23,19,16,0) 100%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.028) 0px, rgba(255,255,255,0.028) 1px, transparent 1px, transparent 16px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .categories-section {
+    position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 5.5rem 1.5rem 4.5rem;
+  }
+  .categories-section::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw; height: 145%;
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.028) 0px, rgba(255,255,255,0.028) 1px, transparent 1px, transparent 16px),
+      radial-gradient(ellipse at center, rgba(23,19,16,0.95) 0%, rgba(23,19,16,0.88) 32%, rgba(23,19,16,0.5) 58%, rgba(23,19,16,0) 82%);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .categories-section .eyebrow, .categories-section h2 { position: relative; }
+  .categories-section h2 { color: var(--paper); }
+  .categories-section .eyebrow { text-align: center; display: block; color: var(--yellow); }
   .categories-section h2 {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 800; font-size: clamp(1.9rem, 4.4vw, 2.8rem);
     text-align: center; margin: 0.6rem 0 2.6rem;
+    color: var(--paper);
   }
   .categories-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.4rem;
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.4rem;
   }
   .cat-card {
     --c: var(--magenta);
+    --tilt: 0deg;
     background: var(--paper-alt);
     border: 2.5px solid var(--ink);
     border-radius: 18px;
     padding: 1.8rem 1.6rem;
     box-shadow: 5px 5px 0 var(--c);
     opacity: 0;
-    transform: translateY(26px) scale(0.97);
+    transform: translateY(26px) scale(0.97) rotate(var(--tilt));
     transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2,0.85,0.25,1.1), box-shadow 0.2s;
+    grid-column: span 3;
   }
-  .cat-card.in-view { opacity: 1; transform: translateY(0) scale(1); }
-  .cat-card:hover { transform: translateY(-4px); box-shadow: 8px 8px 0 var(--c); }
+  .cat-card.featured { grid-column: span 4; padding: 2.2rem 2rem; }
+  .cat-card.compact { grid-column: span 2; }
+  @media (max-width: 820px) {
+    .categories-grid { grid-template-columns: 1fr; }
+    .cat-card, .cat-card.featured, .cat-card.compact { grid-column: span 1; }
+  }
+  .cat-card.in-view { opacity: 1; transform: translateY(0) scale(1) rotate(var(--tilt)); }
+  .cat-card:hover { transform: translateY(-4px) rotate(0deg); box-shadow: 8px 8px 0 var(--c); }
   .cat-card .cat-eyebrow {
     font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 700;
     letter-spacing: 0.1em; text-transform: uppercase; color: var(--c);
@@ -391,6 +429,7 @@
     font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.5rem;
     margin: 0.5rem 0 0.7rem;
   }
+  .cat-card.featured h3 { font-size: 2.1rem; }
   .cat-card p { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.55; margin-bottom: 1.1rem; }
   .cat-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .cat-links a {
@@ -449,6 +488,54 @@
     margin: 1rem 0 0.5rem; line-height: 1.05;
   }
   .stamp p { font-size: 0.93rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: 0.9rem; }
+
+  /* ---------- TERRITOIRES PREMIUM (variante éditoriale, distincte des tampons/cartes) ---------- */
+  .stamps-grid-premium {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 0;
+    border-top: 2px solid var(--ink);
+  }
+  .stamp-premium {
+    --tilt: 0deg;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--ink);
+    border-right: 2px solid var(--ink);
+    border-radius: 0;
+    box-shadow: none;
+    padding: 2.4rem 2rem 2.2rem;
+    position: relative;
+    overflow: hidden;
+    transform: translateY(24px);
+  }
+  .stamps-grid-premium .stamp-premium:last-child { border-right: none; }
+  .stamp-premium.in-view { transform: translateY(0) rotate(0deg) scale(1); }
+  .stamp-premium:hover, .stamp-premium:focus-visible {
+    transform: translateY(-2px) rotate(0deg) scale(1);
+    box-shadow: none;
+    background: rgba(23,19,16,0.025);
+  }
+  .stamp-premium::before {
+    content: attr(data-index);
+    position: absolute; top: 0.8rem; right: 1.2rem;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 3.2rem;
+    color: var(--ink); opacity: 0.06;
+    line-height: 1; pointer-events: none;
+  }
+  .stamp-premium .dot-code {
+    background: none; color: var(--c);
+    border: 1.5px solid var(--c);
+    padding: 0.15rem 0.6rem;
+  }
+  .stamp-premium .skill-name { font-size: 1.7rem; }
+  .stamp-premium .go {
+    color: var(--ink); font-weight: 700;
+    border-bottom: 2px solid var(--c);
+    padding-bottom: 2px;
+    transition: color 0.15s;
+  }
+  .stamp-premium:hover .go { color: var(--c); }
   .stamp .go { font-family: 'Space Mono', monospace; font-size: 0.76rem; font-weight: 700; color: var(--c); }
 
   /* ---------- GALERIE ---------- */
@@ -594,19 +681,20 @@
   <div class="scroll-cue"><span>SCROLL</span><span class="dot"></span></div>
 </section>
 
+<div class="categories-backdrop">
 <section class="categories-section">
   <div class="eyebrow">Ce que JIEE peut faire</div>
   <h2>Des solutions, pas juste des compétences</h2>
   <div class="categories-grid">
 
-    <div class="cat-card" style="--c: var(--blue)">
+    <div class="cat-card featured" style="--c: var(--blue); --tilt: -0.6deg">
       <div class="cat-eyebrow">Solutions professionnelles</div>
       <h3>Web</h3>
       <p>Sites vitrines et expériences numériques sur mesure, pensés pour convertir vos visiteurs en clients.</p>
       <div class="cat-links"><a href="webdesign.html">Sites web →</a></div>
     </div>
 
-    <div class="cat-card" style="--c: var(--magenta)">
+    <div class="cat-card compact" style="--c: var(--magenta); --tilt: 0.8deg">
       <div class="cat-eyebrow">Solutions professionnelles</div>
       <h3>Design</h3>
       <p>Identités visuelles, logos, supports graphiques, et restauration de vos photos les plus précieuses.</p>
@@ -616,14 +704,14 @@
       </div>
     </div>
 
-    <div class="cat-card" style="--c: var(--purple)">
+    <div class="cat-card compact" style="--c: var(--purple); --tilt: -0.9deg">
       <div class="cat-eyebrow">Solutions professionnelles</div>
       <h3>IA & Automatisation</h3>
       <p>Chatbots et automatisation pour répondre à vos clients pendant que vous gérez le reste de votre activité.</p>
       <div class="cat-links"><a href="chatbots.html">Chatbots →</a></div>
     </div>
 
-    <div class="cat-card" style="--c: var(--yellow)">
+    <div class="cat-card featured" style="--c: var(--yellow); --tilt: 0.5deg">
       <div class="cat-eyebrow">Créations</div>
       <h3>Création</h3>
       <p>Chansons personnalisées, écriture sur commande, produits numériques — l'univers créatif de JIEE.</p>
@@ -646,21 +734,21 @@
 <section class="stamps-section" id="stamps">
   <div class="stamps-grid stamps-grid-premium">
 
-    <a class="stamp stamp-premium" href="boutique.html" style="--c: var(--green); --tilt: -1.5deg">
+    <a class="stamp stamp-premium" href="boutique.html" data-index="01" style="--c: var(--green); --tilt: -1.5deg">
       <span class="dot-code">BQ · 09</span>
       <div class="skill-name">Boutique digitale</div>
       <p>Des créations numériques prêtes à l'emploi, disponibles directement en ligne — sans intermédiaire.</p>
       <span class="go">Explorer la boutique →</span>
     </a>
 
-    <a class="stamp stamp-premium" href="amenagement.html" style="--c: var(--blue); --tilt: 1.2deg">
+    <a class="stamp stamp-premium" href="amenagement.html" data-index="02" style="--c: var(--blue); --tilt: 1.2deg">
       <span class="dot-code">AM · 03</span>
       <div class="skill-name">Aménagement paysager</div>
       <p>Un savoir-faire familial, transmis et appliqué avec soin à votre terrain — de la conception à la réalisation.</p>
       <span class="go">Découvrir le territoire →</span>
     </a>
 
-    <a class="stamp stamp-premium" href="yirmeya.html" style="--c: var(--magenta); --tilt: -1.8deg">
+    <a class="stamp stamp-premium" href="yirmeya.html" data-index="03" style="--c: var(--magenta); --tilt: -1.8deg">
       <span class="dot-code">YR · 08</span>
       <div class="skill-name">YIRMEYA</div>
       <p>Une marque de vêtements en préparation — un nom qui cache une histoire, bientôt révélée.</p>

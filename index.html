@@ -1795,14 +1795,82 @@
       resumeAuto();
     });
 
-    // Le doigt (ou la souris) posé sur le carrousel met le défilement en pause,
-    // il reprend automatiquement dès que le visiteur relâche.
-    carousel.addEventListener('touchstart', pauseTemporarily, { passive: true });
-    carousel.addEventListener('touchend', resumeAuto, { passive: true });
-    carousel.addEventListener('mousedown', pauseTemporarily);
-    carousel.addEventListener('mouseup', resumeAuto);
+    // ---------- Glissement manuel (swipe) : gauche/droite pour naviguer ----------
+    let isDragging = false;
+    let dragDecided = false;
+    let dragIsHorizontal = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let dragDeltaX = 0;
+    const SWIPE_MIN_PX = 40; // distance minimale pour valider un changement de slide
+
+    function carouselWidth() {
+      return carousel.getBoundingClientRect().width || 1;
+    }
+
+    function dragStart(x, y) {
+      isDragging = true;
+      dragDecided = false;
+      dragIsHorizontal = false;
+      dragStartX = x;
+      dragStartY = y;
+      dragDeltaX = 0;
+      pauseTemporarily();
+      track.style.transition = 'none';
+    }
+
+    function dragMove(x, y, evt) {
+      if (!isDragging) return;
+      const dx = x - dragStartX;
+      const dy = y - dragStartY;
+
+      if (!dragDecided) {
+        // On attend quelques pixels avant de trancher entre swipe horizontal (carrousel)
+        // et scroll vertical (défilement normal de la page) — pour ne jamais les bloquer par erreur.
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        dragIsHorizontal = Math.abs(dx) > Math.abs(dy);
+        dragDecided = true;
+        if (!dragIsHorizontal) { isDragging = false; resumeAuto(); return; }
+      }
+      if (!dragIsHorizontal) return;
+
+      if (evt && evt.cancelable) evt.preventDefault();
+      dragDeltaX = dx;
+      const percent = (dragDeltaX / carouselWidth()) * 100;
+      track.style.transform = `translateX(calc(-${current * 100}% + ${percent}%))`;
+    }
+
+    function dragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      if (!dragDecided || !dragIsHorizontal) { resumeAuto(); return; }
+
+      const movedEnough = Math.abs(dragDeltaX) > Math.max(SWIPE_MIN_PX, carouselWidth() * 0.12);
+      if (movedEnough) {
+        collapsePanel();
+        if (dragDeltaX < 0) manualGoTo(current + 1); // glissé vers la gauche → élément suivant
+        else manualGoTo(current - 1); // glissé vers la droite → élément précédent
+      } else {
+        setPosition(current, true); // pas assez glissé : on revient à la position actuelle
+        resumeAuto();
+      }
+    }
+
+    carousel.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      dragStart(t.clientX, t.clientY);
+    }, { passive: true });
+    carousel.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      dragMove(t.clientX, t.clientY, e);
+    }, { passive: false });
+    carousel.addEventListener('touchend', dragEnd, { passive: true });
+
+    carousel.addEventListener('mousedown', (e) => { dragStart(e.clientX, e.clientY); e.preventDefault(); });
+    carousel.addEventListener('mousemove', (e) => { if (isDragging) dragMove(e.clientX, e.clientY); });
+    window.addEventListener('mouseup', dragEnd);
     carousel.addEventListener('mouseenter', pauseTemporarily);
-    carousel.addEventListener('mouseleave', resumeAuto);
+    carousel.addEventListener('mouseleave', () => { if (isDragging) dragEnd(); else resumeAuto(); });
 
     carousel.style.display = 'block';
     setPosition(0, false);

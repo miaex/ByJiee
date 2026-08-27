@@ -994,6 +994,30 @@
   .footer-legal { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.2rem; }
   .footer-legal a { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: #8A8377; text-decoration: none; }
   .footer-legal a:hover { color: var(--paper); }
+
+  .whatsapp-float {
+    position: fixed; right: 1.4rem; bottom: 1.4rem; z-index: 600;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #128C7E; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+    text-decoration: none;
+    animation: whatsappPulse 2.6s ease-in-out infinite;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .whatsapp-float:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.34);
+  }
+  .whatsapp-float svg { width: 30px; height: 30px; }
+  @keyframes whatsappPulse {
+    0%, 100% { box-shadow: 0 6px 18px rgba(0,0,0,0.28), 0 0 0 0 rgba(18,140,126,0.5); }
+    50% { box-shadow: 0 6px 18px rgba(0,0,0,0.28), 0 0 0 10px rgba(18,140,126,0); }
+  }
+  @media (max-width: 640px) {
+    .whatsapp-float { right: 1rem; bottom: 1rem; width: 50px; height: 50px; }
+    .whatsapp-float svg { width: 26px; height: 26px; }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -2097,6 +2121,18 @@
     grid.querySelectorAll('.temoignage-card').forEach(el => tObserver.observe(el));
 
     section.style.display = 'block';
+  })();
+</script>
+
+<a href="#" id="whatsappFloat" class="whatsapp-float" aria-label="Discuter sur WhatsApp" target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.02 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.42 1.26 4.86L2 22l5.34-1.4a9.9 9.9 0 0 0 4.68 1.19h.01c5.5 0 9.96-4.46 9.96-9.96S17.52 2 12.02 2Zm0 18.2h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.17.83.85-3.09-.2-.32a8.23 8.23 0 0 1-1.27-4.4c0-4.55 3.7-8.25 8.3-8.25a8.24 8.24 0 0 1 8.29 8.25c0 4.55-3.71 8.31-8.3 8.31Zm4.52-6.19c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.24-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.24-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.66.31-.22.24-.87.85-.87 2.08s.89 2.42 1.02 2.59c.12.16 1.75 2.68 4.25 3.75.59.26 1.06.41 1.42.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.16-.48-.28Z"/></svg>
+</a>
+<script>
+  (function () {
+    var floatBtn = document.getElementById('whatsappFloat');
+    if (floatBtn && typeof buildWhatsAppLink === 'function') {
+      floatBtn.setAttribute('href', buildWhatsAppLink("Bonjour, je viens du site By Jiee et j'aimerais avoir plus d'informations."));
+    }
   })();
 </script>
 

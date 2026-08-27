@@ -194,9 +194,9 @@
   <div class="modal">
     <h2 id="modalTitle">Nouvel élément</h2>
     <form id="itemForm">
-      <div class="field"><label for="fTitle">Titre</label><input type="text" id="fTitle" required></div>
+      <div class="field"><label for="fTitle" id="fTitleLabel">Titre</label><input type="text" id="fTitle" required></div>
       <div class="field"><label for="fDesc" id="fDescLabel">Description courte</label><textarea id="fDesc" required></textarea></div>
-      <div class="field"><label for="fMeta">Info complémentaire (délai, garantie, statut...)</label><input type="text" id="fMeta" placeholder="Ex: Livraison sous 24h"></div>
+      <div class="field"><label for="fMeta" id="fMetaLabel">Info complémentaire (délai, garantie, statut...)</label><input type="text" id="fMeta" placeholder="Ex: Livraison sous 24h"></div>
 
       <div id="priceFieldWrap" style="display:none;">
         <div class="field">
@@ -286,7 +286,7 @@
       </div>
 
       <div class="field" id="imageFieldWrap">
-        <label>Images</label>
+        <label id="fImagesLabel">Images</label>
         <label class="image-drop" id="imageDrop">
           Clique pour choisir une image (recadrage automatique)
           <input type="file" id="fImages" accept="image/*">
@@ -326,6 +326,7 @@
     { id: 'featured', label: 'À la une', group: 'Accueil', color: '--yellow' },
     { id: 'projets', label: 'Projets sélectionnés', group: 'Accueil', color: '--blue' },
     { id: 'galerie', label: 'Galerie (photos & vidéos)', group: 'Accueil', color: '--green' },
+    { id: 'temoignages', label: 'Témoignages clients', group: 'Accueil', color: '--yellow' },
     { id: 'graphisme', label: 'Graphisme', group: 'Pages compétences', color: '--magenta' },
     { id: 'storysongs', label: 'StorySongs', group: 'Pages compétences', color: '--blue' },
     { id: 'amenagement', label: 'Aménagement paysager', group: 'Pages compétences', color: '--green' },
@@ -593,6 +594,7 @@
   // Le format suggéré en premier dépend de la page, mais "Libre" reste toujours disponible.
   function suggestedRatioFor(section) {
     if (section === 'boutique') return 1;
+    if (section === 'temoignages') return 1;
     if (section === 'featured') return 3 / 4;
     return 4 / 3;
   }
@@ -677,6 +679,9 @@
   const fFullText = document.getElementById('fFullText');
   const fFeaturedLink = document.getElementById('fFeaturedLink');
   const fDescLabel = document.getElementById('fDescLabel');
+  const fTitleLabel = document.getElementById('fTitleLabel');
+  const fMetaLabel = document.getElementById('fMetaLabel');
+  const fImagesLabel = document.getElementById('fImagesLabel');
 
   const projetFieldWrap = document.getElementById('projetFieldWrap');
   const fProjectType = document.getElementById('fProjectType');
@@ -736,12 +741,17 @@
     const isFeatured = currentSection === 'featured';
     const isGalerie = currentSection === 'galerie';
     const isProjet = currentSection === 'projets';
+    const isTemoignage = currentSection === 'temoignages';
     buttonConfigFields.style.display = isBoutique ? 'block' : 'none';
     priceFieldWrap.style.display = isBoutique ? 'block' : 'none';
     featuredFieldWrap.style.display = isFeatured ? 'block' : 'none';
     galerieFieldWrap.style.display = isGalerie ? 'block' : 'none';
     projetFieldWrap.style.display = isProjet ? 'block' : 'none';
-    fDescLabel.textContent = isFeatured ? 'Accroche courte (visible sur l\u2019image)' : (isProjet ? 'Contexte (courte présentation)' : 'Description courte');
+    fTitleLabel.textContent = isTemoignage ? 'Nom du client' : 'Titre';
+    fDescLabel.textContent = isFeatured ? 'Accroche courte (visible sur l\u2019image)' : (isProjet ? 'Contexte (courte présentation)' : (isTemoignage ? 'Commentaire du client' : 'Description courte'));
+    fMetaLabel.textContent = isTemoignage ? 'Activité / métier du client' : 'Info complémentaire (délai, garantie, statut...)';
+    fMeta.placeholder = isTemoignage ? 'Ex: Restauratrice, Coiffeur, Entrepreneur...' : 'Ex: Livraison sous 24h';
+    fImagesLabel.textContent = isTemoignage ? 'Photo du client (format carré recommandé)' : 'Images';
     videoUploadStatus.style.display = 'none';
 
     if (item) {

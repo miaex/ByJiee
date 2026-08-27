@@ -806,7 +806,28 @@
   /* ---------- POURQUOI JIEE ---------- */
   /* ---------- PROJETS SÉLECTIONNÉS ---------- */
   .projets-section { max-width: 1120px; margin: 0 auto; padding: 1rem 1.5rem 2rem; }
-  .projets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.6rem; margin-top: 2.2rem; }
+  .projets-scroll-wrap { display: flex; align-items: center; gap: 0.7rem; margin-top: 2.2rem; }
+  .projets-grid {
+    display: flex; gap: 1.6rem; margin-top: 0;
+    overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+    padding: 0.3rem 0.3rem 1rem;
+    scrollbar-width: none;
+  }
+  .projets-grid::-webkit-scrollbar { display: none; }
+  .pj-arrow {
+    flex-shrink: 0;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--paper); border: 2.5px solid var(--ink); color: var(--ink);
+    font-size: 1.3rem; font-weight: 800; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+  }
+  .pj-arrow:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+  .pj-arrow:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+  .pj-arrow.is-disabled { opacity: 0.3; cursor: default; pointer-events: none; box-shadow: 3px 3px 0 var(--ink); transform: none; }
+  .pj-arrow.is-hidden { display: none; }
+  @media (max-width: 620px) { .pj-arrow { width: 38px; height: 38px; font-size: 1.1rem; } }
   .projet-card {
     --c: var(--blue);
     background: var(--paper-alt);
@@ -817,7 +838,10 @@
     opacity: 0;
     transform: translateY(28px) scale(0.97);
     transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2,0.85,0.25,1.1);
+    flex: 0 0 320px;
+    scroll-snap-align: start;
   }
+  @media (min-width: 560px) { .projet-card { flex-basis: 350px; } }
   .projet-card.in-view { opacity: 1; transform: translateY(0) scale(1); }
   .projet-card .projet-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; border-bottom: 2.5px solid var(--ink); background: var(--paper); }
   .projet-card .projet-body { padding: 1.5rem 1.5rem 1.7rem; }
@@ -845,6 +869,26 @@
     color: var(--c); text-decoration: none;
   }
   .projet-link:hover { text-decoration: underline; }
+
+  /* ---------- TÉMOIGNAGES ---------- */
+  .temoignages-section { max-width: 1120px; margin: 0 auto; padding: 1rem 1.5rem 2rem; }
+  .temoignages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.6rem; margin-top: 2.2rem; }
+  .temoignage-card {
+    background: var(--paper-alt);
+    border: 2.5px solid var(--ink);
+    border-radius: 20px;
+    padding: 1.6rem 1.5rem;
+    box-shadow: 6px 6px 0 var(--yellow);
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+    transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2,0.85,0.25,1.1);
+  }
+  .temoignage-card.in-view { opacity: 1; transform: translateY(0) scale(1); }
+  .temoignage-header { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1rem; }
+  .temoignage-photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid var(--ink); flex-shrink: 0; background: var(--paper); }
+  .temoignage-identity h4 { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 1.05rem; line-height: 1.2; }
+  .temoignage-identity span { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+  .temoignage-quote { font-size: 0.9rem; line-height: 1.55; color: var(--ink); }
 
   .why-section { max-width: 1120px; margin: 0 auto; padding: 1rem 1.5rem 5.5rem; }
   .why-grid {
@@ -1133,7 +1177,11 @@
     <h2>Projets sélectionnés</h2>
     <p>Ce que JIEE a réellement conçu — présenté honnêtement, avec le contexte, la démarche et le résultat.</p>
   </div>
-  <div class="projets-grid" id="projetsGrid"></div>
+  <div class="projets-scroll-wrap">
+    <button type="button" class="pj-arrow pj-arrow-prev" id="projetsPrev" aria-label="Projet précédent">&lsaquo;</button>
+    <div class="projets-grid" id="projetsGrid"></div>
+    <button type="button" class="pj-arrow pj-arrow-next" id="projetsNext" aria-label="Projet suivant">&rsaquo;</button>
+  </div>
 </section>
 
 <section class="why-section" id="pourquoi">
@@ -1215,6 +1263,15 @@
 
     <div class="signature">— Jérémie K. ETSO</div>
   </div>
+</section>
+
+<section class="temoignages-section" id="temoignagesSection" style="display:none;">
+  <div class="intro" style="padding-bottom: 0;">
+    <div class="eyebrow">Ils ont testé</div>
+    <h2>Ce qu'en disent les clients</h2>
+    <p>Des retours directs, sans filtre, de personnes qui ont travaillé avec JIEE.</p>
+  </div>
+  <div class="temoignages-grid" id="temoignagesGrid"></div>
 </section>
 
 <section class="contact" id="contact">
@@ -1901,6 +1958,70 @@
       });
     }, { threshold: 0.15 });
     grid.querySelectorAll('.projet-card').forEach(el => pObserver.observe(el));
+
+    // Flèches de défilement horizontal
+    const pjPrev = document.getElementById('projetsPrev');
+    const pjNext = document.getElementById('projetsNext');
+
+    function pjScrollAmount() {
+      const card = grid.querySelector('.projet-card');
+      if (!card) return 340;
+      const style = window.getComputedStyle(grid);
+      const gap = parseFloat(style.columnGap || style.gap || '0') || 0;
+      return card.getBoundingClientRect().width + gap;
+    }
+    function pjUpdateArrows() {
+      const scrollable = grid.scrollWidth - grid.clientWidth > 2;
+      if (!scrollable) {
+        pjPrev.classList.add('is-hidden');
+        pjNext.classList.add('is-hidden');
+        return;
+      }
+      pjPrev.classList.remove('is-hidden');
+      pjNext.classList.remove('is-hidden');
+      const maxScroll = grid.scrollWidth - grid.clientWidth - 2;
+      pjPrev.classList.toggle('is-disabled', grid.scrollLeft <= 2);
+      pjNext.classList.toggle('is-disabled', grid.scrollLeft >= maxScroll);
+    }
+    pjPrev.addEventListener('click', () => grid.scrollBy({ left: -pjScrollAmount(), behavior: 'smooth' }));
+    pjNext.addEventListener('click', () => grid.scrollBy({ left: pjScrollAmount(), behavior: 'smooth' }));
+    grid.addEventListener('scroll', pjUpdateArrows);
+    window.addEventListener('resize', pjUpdateArrows);
+    setTimeout(pjUpdateArrows, 300);
+
+    section.style.display = 'block';
+  })();
+
+  // ---------- TÉMOIGNAGES ----------
+  (async function loadTemoignages() {
+    const { data: items, error } = await sbMsg.from('content_items').select('*').eq('page_slug', 'temoignages').order('created_at', { ascending: true });
+    if (error || !items || items.length === 0) return;
+
+    const section = document.getElementById('temoignagesSection');
+    const grid = document.getElementById('temoignagesGrid');
+
+    grid.innerHTML = items.map(item => `
+      <div class="temoignage-card">
+        <div class="temoignage-header">
+          ${item.images && item.images[0] ? `<img class="temoignage-photo" src="${item.images[0]}" alt="${item.title || ''}">` : ''}
+          <div class="temoignage-identity">
+            ${item.title ? `<h4>${item.title}</h4>` : ''}
+            ${item.meta ? `<span>${item.meta}</span>` : ''}
+          </div>
+        </div>
+        ${item.description ? `<p class="temoignage-quote">${item.description}</p>` : ''}
+      </div>
+    `).join('');
+
+    const tObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('in-view'), i * 80);
+          tObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    grid.querySelectorAll('.temoignage-card').forEach(el => tObserver.observe(el));
 
     section.style.display = 'block';
   })();

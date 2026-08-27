@@ -205,6 +205,34 @@
         </div>
       </div>
 
+      <div id="projetFieldWrap" style="display:none;">
+        <div class="field">
+          <label for="fProjectType">Type de projet</label>
+          <select id="fProjectType">
+            <option value="">— Choisir —</option>
+            <option value="client">Projet client</option>
+            <option value="personnel">Projet personnel</option>
+            <option value="concept">Concept</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fChallenge">Le défi</label>
+          <textarea id="fChallenge" placeholder="Ce que le projet devait résoudre"></textarea>
+        </div>
+        <div class="field">
+          <label for="fSolution">La solution</label>
+          <textarea id="fSolution" placeholder="Ce que JIEE a conçu"></textarea>
+        </div>
+        <div class="field">
+          <label for="fResult">Le résultat</label>
+          <textarea id="fResult" placeholder="Le résultat obtenu, réel ou attendu"></textarea>
+        </div>
+        <div class="field">
+          <label for="fProjectLink">Lien vers le projet (optionnel)</label>
+          <input type="text" id="fProjectLink" placeholder="Ex: storysongs.html ou https://...">
+        </div>
+      </div>
+
       <div id="featuredFieldWrap" style="display:none;">
         <div class="field">
           <label for="fFullText">Texte complet (affiché au clic)</label>
@@ -296,6 +324,7 @@
   const sections = [
     { id: 'dashboard', label: 'Tableau de bord', group: null, color: '--magenta' },
     { id: 'featured', label: 'À la une', group: 'Accueil', color: '--yellow' },
+    { id: 'projets', label: 'Projets sélectionnés', group: 'Accueil', color: '--blue' },
     { id: 'galerie', label: 'Galerie (photos & vidéos)', group: 'Accueil', color: '--green' },
     { id: 'graphisme', label: 'Graphisme', group: 'Pages compétences', color: '--magenta' },
     { id: 'storysongs', label: 'StorySongs', group: 'Pages compétences', color: '--blue' },
@@ -649,6 +678,13 @@
   const fFeaturedLink = document.getElementById('fFeaturedLink');
   const fDescLabel = document.getElementById('fDescLabel');
 
+  const projetFieldWrap = document.getElementById('projetFieldWrap');
+  const fProjectType = document.getElementById('fProjectType');
+  const fChallenge = document.getElementById('fChallenge');
+  const fSolution = document.getElementById('fSolution');
+  const fResult = document.getElementById('fResult');
+  const fProjectLink = document.getElementById('fProjectLink');
+
   const galerieFieldWrap = document.getElementById('galerieFieldWrap');
   const imageFieldWrap = document.getElementById('imageFieldWrap');
   const fMediaType = document.getElementById('fMediaType');
@@ -699,11 +735,13 @@
     const isBoutique = currentSection === 'boutique';
     const isFeatured = currentSection === 'featured';
     const isGalerie = currentSection === 'galerie';
+    const isProjet = currentSection === 'projets';
     buttonConfigFields.style.display = isBoutique ? 'block' : 'none';
     priceFieldWrap.style.display = isBoutique ? 'block' : 'none';
     featuredFieldWrap.style.display = isFeatured ? 'block' : 'none';
     galerieFieldWrap.style.display = isGalerie ? 'block' : 'none';
-    fDescLabel.textContent = isFeatured ? 'Accroche courte (visible sur l\u2019image)' : 'Description courte';
+    projetFieldWrap.style.display = isProjet ? 'block' : 'none';
+    fDescLabel.textContent = isFeatured ? 'Accroche courte (visible sur l\u2019image)' : (isProjet ? 'Contexte (courte présentation)' : 'Description courte');
     videoUploadStatus.style.display = 'none';
 
     if (item) {
@@ -716,6 +754,11 @@
       fButtonValue.value = item.button_value || '';
       fFullText.value = item.full_text || '';
       fFeaturedLink.value = isFeatured ? (item.button_value || '') : '';
+      fProjectType.value = item.project_type || '';
+      fChallenge.value = item.challenge || '';
+      fSolution.value = item.solution_text || '';
+      fResult.value = item.result_text || '';
+      fProjectLink.value = isProjet ? (item.button_value || '') : '';
       fMediaType.value = item.media_type || 'image';
       fVideoLink.value = item.media_type === 'video_link' ? (item.video_url || '') : '';
       fButtonType.dispatchEvent(new Event('change'));
@@ -744,6 +787,7 @@
 
     const isFeatured = currentSection === 'featured';
     const isGalerie = currentSection === 'galerie';
+    const isProjet = currentSection === 'projets';
     const payload = {
       page_slug: currentSection,
       title: fTitle.value,
@@ -754,9 +798,13 @@
       images: modalImages,
       full_text: isFeatured ? fFullText.value : null,
       button_type: currentSection === 'boutique' ? (fButtonType.value || null) : null,
-      button_value: currentSection === 'boutique' ? (fButtonValue.value || null) : (isFeatured ? (fFeaturedLink.value || null) : null),
+      button_value: currentSection === 'boutique' ? (fButtonValue.value || null) : (isFeatured ? (fFeaturedLink.value || null) : (isProjet ? (fProjectLink.value || null) : null)),
       media_type: isGalerie ? fMediaType.value : 'image',
       video_url: isGalerie ? (fMediaType.value === 'video_link' ? (fVideoLink.value || null) : (fMediaType.value === 'video_upload' ? (uploadedVideoUrl || null) : null)) : null,
+      project_type: isProjet ? (fProjectType.value || null) : null,
+      challenge: isProjet ? (fChallenge.value || null) : null,
+      solution_text: isProjet ? (fSolution.value || null) : null,
+      result_text: isProjet ? (fResult.value || null) : null,
     };
 
     if (editingId) {
